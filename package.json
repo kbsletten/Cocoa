@@ -4,7 +4,7 @@
   "description": "A Discord bot built to automate the Call of Cthulhu role playing game.",
   "main": "src/cocoa.js",
   "scripts": {
-    "codegen": "pegjs -o src/parser/command.gen.js src/parser/command.pegjs",
+    "build": "pegjs -o src/parser/command.gen.js src/parser/command.pegjs",
     "start": "nodemon src/cocoa.js",
     "test": "jest"
   },
