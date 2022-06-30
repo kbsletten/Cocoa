@@ -24,16 +24,16 @@ function mapCharacter(character) {
 async function createCharacter(serverId, userId, name, data) {
   const id = uuid();
   await DB.run(
-    `INSERT INTO Characters (CharacterId, UserId, Name, Data) VALUES (?, ?, ?, ?)`,
+    `INSERT INTO Characters (CharacterId, Name, Data) VALUES (?, ?, ?)`,
     id,
-    userId,
     name,
     data
   );
   await DB.run(
-    `INSERT INTO ServerCharacters (CharacterId, ServerId) VALUES (?, ?)`,
+    `INSERT INTO ServerCharacters (CharacterId, ServerId, UserId) VALUES (?, ?, ?)`,
     id,
-    serverId
+    serverId,
+    userId
   );
   return id;
 }
