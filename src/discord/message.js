@@ -94,6 +94,20 @@ cocoaClient.on("messageCreate", async (msg) => {
         msg.reply(getEditMessage(character));
         break;
       }
+      case "rename character": {
+        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
+        if (!character) {
+          msg.reply(
+            `Whoops! You don't have any characters yet. Try "new character".`
+          );
+          break;
+        }
+        const oldName = character.Name;
+        character.Name = expr.name;
+        await DB.updateCharacterName(character.CharacterId, character.Name);
+        msg.reply(`Renamed ${oldName} to ${character.Name}`);
+        break;
+      }
       case "delete character": {
         const character = await DB.getCharacter(msg.guild.id, msg.author.id);
         if (!character) {

@@ -16,10 +16,11 @@ jest.mock("../discord/cocoaClient", () => {
 jest.mock("../db/character", () => {
   return {
     createCharacter: jest.fn(),
-    getCharacter: jest.fn(),
     deleteCharacter: jest.fn(),
+    getCharacter: jest.fn(),
     listCharacters: jest.fn(),
     updateCharacterData: jest.fn(),
+    updateCharacterName: jest.fn(),
   };
 });
 jest;
@@ -441,9 +442,22 @@ Skills: Not set`
     );
 });
 
+// Do this last because it screws up the dummy data
+test("'rename character New Name' renames the character", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+
+  const newCharacterMessage = new MockMessage("rename character New Name");
+  await eventHandlers["messageCreate"](newCharacterMessage);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(dummyCharacter.Name).toBe("New Name");
+  expect(DB.updateCharacterName).toHaveBeenCalled();
+  expect(newCharacterMessage.reply).toHaveBeenCalled();
+});
+
 for (const command of [
   "edit character",
   "delete character Dummy Character",
+  "rename character New Name",
   "skill Listen 70",
   "skill Listen bonus",
   "list server characters",

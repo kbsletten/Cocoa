@@ -72,6 +72,15 @@ async function updateCharacterData(characterId, data) {
   return result;
 }
 
+async function updateCharacterName(characterId, name) {
+  const result = await DB.run(
+    `UPDATE Characters SET Name = ? WHERE CharacterId = ?`,
+    name,
+    characterId
+  );
+  return result;
+}
+
 async function listCharacters(serverId, userId) {
   const results = await DB.all(
     userId
@@ -85,9 +94,10 @@ async function listCharacters(serverId, userId) {
 
 module.exports = {
   createCharacter,
+  deleteCharacter,
   getCharacter,
   getCharacterById,
-  deleteCharacter,
   listCharacters,
   updateCharacterData,
+  updateCharacterName,
 };

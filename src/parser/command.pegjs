@@ -2,6 +2,7 @@ Command
     =   NEW WS CHARACTER WS n:NAME WS? { return { 'command': 'new character', 'name': n }; }
     /   NEW WS CHARACTER WS? { return { 'command': 'new character' }; }
     /   EDIT WS CHARACTER { return { 'command': 'edit character' }; }
+    /   RENAME WS CHARACTER WS n:NAME WS? { return { 'command': 'rename character', 'name': n }; }
     /   DELETE WS CHARACTER WS n:NAME WS? { return { 'command': 'delete character', 'name': n }; }
     /   LIST WS SERVER WS CHARACTERS WS? { return { 'command': 'list server characters' }; }
     /   LIST WS CHARACTERS WS? { return { 'command': 'list characters' }; }
@@ -124,6 +125,9 @@ PENALTY
     =   'penalty'i
     /   'pen'i
     /   'p'i
+    ;
+RENAME
+    =   'rename'i
     ;
 RESET
     =   'reset'i
