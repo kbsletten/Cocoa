@@ -61,9 +61,6 @@ function findSkill(
   }
   const skill = skill_options[0];
   const value = skills[skill];
-  if (value === undefined) {
-    return { error: `I'm sorry, ${skill} isn't set for ${character.Name}.` };
-  }
   return { skill, value };
 }
 
