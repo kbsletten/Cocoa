@@ -30,7 +30,12 @@ async function createCharacter(serverId, userId, name, data) {
     data
   );
   await DB.run(
-    `INSERT INTO ServerCharacters (CharacterId, ServerId, UserId) VALUES (?, ?, ?)`,
+    `UPDATE ServerCharacters SET IsPrimary = FALSE WHERE ServerId = ? AND UserId = ?`,
+    serverId,
+    userId
+  );
+  await DB.run(
+    `INSERT INTO ServerCharacters (CharacterId, ServerId, UserId, IsPrimary) VALUES (?, ?, ?, TRUE)`,
     id,
     serverId,
     userId
@@ -56,7 +61,7 @@ async function getCharacterById(characterId) {
 
 async function getCharacter(serverId, userId) {
   const result = await DB.get(
-    `SELECT Characters.* FROM Characters JOIN ServerCharacters ON Characters.CharacterId = ServerCharacters.CharacterId WHERE ServerId = ? AND UserId = ?`,
+    `SELECT Characters.* FROM Characters JOIN ServerCharacters ON Characters.CharacterId = ServerCharacters.CharacterId WHERE ServerId = ? AND UserId = ? ORDER BY IsPrimary DESC`,
     serverId,
     userId
   );

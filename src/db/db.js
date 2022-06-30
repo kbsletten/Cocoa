@@ -47,8 +47,15 @@ function getPromise(sql, ...params) {
 async function runAllSql(script) {
   console.log(`Running script:
 ${script}`);
-  for (const comm of script.split(";")) {
-    await runPromise(comm);
+  await runPromise("BEGIN");
+  try {
+    for (const comm of script.split(";")) {
+      await runPromise(comm);
+    }
+    await runPromise("END");
+  } catch (e) {
+    console.error(e);
+    await runPromise("ROLLBACK");
   }
 }
 
@@ -61,6 +68,10 @@ const loading = (async function loadingFunction() {
   if (!versions.includes("ServerCharacters-UserId")) {
     const serverCharacterUserId = await loadSql("./ServerCharacters-UserId.sql");
     await runAllSql(serverCharacterUserId);
+  }
+  if (!versions.includes("ServerCharacters-IsPrimary")) {
+    const serverCharacterIsPrimary = await loadSql("./ServerCharacters-IsPrimary.sql");
+    await runAllSql(serverCharacterIsPrimary);
   }
   isLoaded = true;
 })();
