@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const Discord = require("discord.js");
 const { cocoaClient } = require("./cocoaClient");
 const parser = require("../parser/command.gen");
@@ -119,7 +121,7 @@ cocoaClient.on("messageCreate", async (msg) => {
         if (character.Name === expr.name) {
           DB.deleteCharacter(character.CharacterId);
         }
-        msg.reply(`:headstone: ${character.Name} has been deleted.`);
+        msg.reply(`${character.Name} has been deleted.`);
         break;
       }
       case "list server characters":
@@ -237,7 +239,7 @@ ${message}; **${result}!**`
         );
         if (nextHP !== prevHP) {
           character.Data.Stats.HP = nextHP;
-          DB.updateCharacterData(character.CharacterId, character.Data);
+          await DB.updateCharacterData(character.CharacterId, character.Data);
         }
         msg.reply(`${character.Name}'s HP: ${display}`);
         break;
@@ -261,7 +263,7 @@ ${message}; **${result}!**`
         );
         if (nextSan !== prevSan) {
           character.Data.Stats.Sanity = nextSan;
-          DB.updateCharacterData(character.CharacterId, character.Data);
+          await DB.updateCharacterData(character.CharacterId, character.Data);
         }
         msg.reply(`${character.Name}'s Sanity: ${display}`);
         break;
@@ -285,7 +287,7 @@ ${message}; **${result}!**`
         );
         if (nextLuck !== prevLuck) {
           character.Data.Stats.Luck = nextLuck;
-          DB.updateCharacterData(character.CharacterId, character.Data);
+          await DB.updateCharacterData(character.CharacterId, character.Data);
         }
         msg.reply(`${character.Name}'s Luck: ${display}`);
         break;
@@ -301,7 +303,7 @@ ${message}; **${result}!**`
         const { skill, value, error } = findSkill(character, expr.skill, false);
         if (value && !character.Data.Improvements.includes(value)) {
           character.Data.Improvements = [...character.Data.Improvements, skill];
-          DB.updateCharacterData(character.CharacterId, character.Data);
+          await DB.updateCharacterData(character.CharacterId, character.Data);
         }
         msg.reply(
           error ??
@@ -345,13 +347,13 @@ ${message}; **${result}!**`
           if (!success) {
             display = `Improvement: ${improve(character, skill).display}`;
           }
-          results.push(`**${skill}**: ${message}
+          results.push(`**${skill} (${value}%)**: ${message}
 ${display}`);
         }
         character.Data.Improvements = character.Data.Improvements.filter(
           (it) => !improvements.includes(it)
         );
-        DB.updateCharacterData(character.CharacterId, character.Data);
+        await DB.updateCharacterData(character.CharacterId, character.Data);
 
         msg.reply(results.join("\n\n"));
         break;
@@ -383,7 +385,7 @@ ${display}`);
           break;
         }
         character.Data.Skills[skill] = Math.min(99, Math.max(0, expr.value));
-        DB.updateCharacterData(character.CharacterId, character.Data);
+        await DB.updateCharacterData(character.CharacterId, character.Data);
         msg.reply(listSkills(character));
         break;
       }
@@ -401,7 +403,7 @@ ${display}`);
           break;
         }
         delete character.Data.Skills[skill];
-        DB.updateCharacterData(character.CharacterId, character.Data);
+        await DB.updateCharacterData(character.CharacterId, character.Data);
         msg.reply(listSkills(character));
         break;
       }
@@ -420,6 +422,16 @@ Skills: ${listSkills(character)}`
         );
         break;
       }
+      case "help": {
+        const helpText = await new Promise((resolve, reject) =>
+          fs.readFile(
+            path.join(__dirname, `../help/${expr.help}.md`),
+            (err, data) => (err ? reject(err) : resolve(data.toString()))
+          )
+        );
+        msg.reply(helpText);
+        break;
+      }
       default:
         msg.reply(
           `I'm sorry, I don't understand "${expr.command}". Kyle will probably teach me soon.`
@@ -427,7 +439,9 @@ Skills: ${listSkills(character)}`
         break;
     }
   } catch (e) {
-    msg.reply(`:head_bandage: I'm really sorry, but something has gone terribly wrong.`);
+    msg.reply(
+      `:head_bandage: I'm really sorry, but something has gone terribly wrong.`
+    );
     console.error("Failed to process message", e);
   }
 });
