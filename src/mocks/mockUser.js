@@ -6,6 +6,7 @@ class MockUser {
         this.bot = bot;
         this.nickname = "Test Nickname";
         this.username = "Test Username";
+        this.roles = [];
     }
 }
 

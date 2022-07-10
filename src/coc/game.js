@@ -30,6 +30,27 @@ function d10(number = 1, { add, multiply } = { add: 0, multiply: 1 }) {
   return die(10, number, add, multiply);
 }
 
+function formatOptions(options) {
+  if (options.length == 2) {
+    return `${options[0]} or ${options[1]}`;
+  }
+  return [
+    ...options.slice(0, options.length - 1),
+    `or ${options[options.length - 1]}`,
+  ].join(", ");
+}
+
+function fuzzySearch(arr, term) {
+  const matching = arr.filter((it) =>
+    it.toLowerCase().includes(term.toLowerCase())
+  );
+  const match = matching.length == 1 ? matching[0] : null;
+  return {
+    matching,
+    match,
+  };
+}
+
 function findSkill(
   character,
   skill_name,
@@ -40,26 +61,20 @@ function findSkill(
     ...(includeDefaults ? getDefaults(character, includeCharacteristics) : {}),
     ...character.Data.Skills,
   };
-  const skill_options = Object.keys(skills).filter((it) =>
-    it.toLowerCase().includes(skill_name.toLowerCase())
+  const { matching: skill_options, match: skill } = fuzzySearch(
+    Object.keys(skills),
+    skill_name
   );
   if (!skill_options.length) {
     return { error: `I'm sorry, I haven't heard of "${skill_name}"` };
   }
-  if (skill_options.length == 2) {
-    return {
-      error: `I'm sorry, I can't tell if you mean ${skill_options[0]} or ${skill_options[1]}`,
-    };
-  }
   if (skill_options.length > 1) {
     return {
-      error: `I'm sorry, I can't tell if you mean ${[
-        ...skill_options.slice(0, skill_options.length - 1),
-        `or ${skill_options[skill_options.length - 1]}`,
-      ].join(", ")}`,
+      error: `I'm sorry, I can't tell if you mean ${formatOptions(
+        skill_options
+      )}`,
     };
   }
-  const skill = skill_options[0];
   const value = skills[skill];
   return { skill, value };
 }
@@ -182,6 +197,7 @@ module.exports = {
   d6,
   die,
   findSkill,
+  fuzzySearch,
   improve,
   listSkills,
   listStats,

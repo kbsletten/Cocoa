@@ -7,7 +7,7 @@ const { getEditMessage } = require("./getEditMessage");
 
 cocoaClient.on("interactionCreate", async (interaction) => {
   try {
-    const [command, id, operation, value] = interaction.customId.split(":");
+    const [command, id, operation, value] = interaction.customId.split(":", 4);
     switch (command) {
       case "editCharacter": {
         const character = await DB.getCharacterById(id);

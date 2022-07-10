@@ -325,10 +325,10 @@ test("'hp 11' sets the HP to 10", async () => {
   );
 });
 
-test("'san 10' sets the sanity to 10", async () => {
+test("'sanity 10' sets the sanity to 10", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
 
-  const message = new MockMessage("san 10");
+  const message = new MockMessage("sanity 10");
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(DB.updateCharacterData).toHaveBeenCalled();
@@ -453,7 +453,7 @@ for (const command of [
   "list server characters",
   "list characters",
   "hp +5",
-  "san -5",
+  "sanity -5",
   "luck 5",
   "mark Listen",
   "improve marked",

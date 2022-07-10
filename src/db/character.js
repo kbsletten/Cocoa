@@ -6,9 +6,6 @@ function mapCharacter(character) {
     return null;
   }
   const data = JSON.parse(character.Data);
-  if (data.Characteristics?.Luck) {
-    delete data.Characteristics.Luck;
-  }
   return {
     ...character,
     Data: {

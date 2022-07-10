@@ -9,6 +9,7 @@ const {
   d6,
   die,
   findSkill,
+  fuzzySearch,
   improve,
   listSkills,
   listStats,
@@ -21,6 +22,15 @@ const { getEditMessage } = require("./getEditMessage");
 async function getAuthorDisplayName(msg) {
   const member = await msg.guild.members.fetch(msg.author);
   return member ? member.nickname : msg.author.username;
+}
+
+async function getCurrentCharacter(msg, expr) {
+  const character = await DB.getCharacter(msg.guild.id, msg.author.id);
+  if (character) {
+    return character;
+  }
+  msg.reply(`Whoops! You don't have any characters yet. Try "new character".`);
+  return null;
 }
 
 cocoaClient.on("messageCreate", async (msg) => {
@@ -86,24 +96,14 @@ cocoaClient.on("messageCreate", async (msg) => {
         });
         break;
       case "edit character": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         msg.reply(getEditMessage(character));
         break;
       }
       case "rename character": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         const oldName = character.Name;
         character.Name = expr.name;
         await DB.updateCharacterName(character.CharacterId, character.Name);
@@ -111,13 +111,8 @@ cocoaClient.on("messageCreate", async (msg) => {
         break;
       }
       case "delete character": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         if (character.Name === expr.name) {
           DB.deleteCharacter(character.CharacterId);
         }
@@ -165,13 +160,8 @@ ${details.join("\n\n")}`
         break;
       }
       case "skill roll": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         const bonus = expr.bonus - expr.penalty;
         const modifiers =
           bonus > 0
@@ -222,13 +212,8 @@ ${message}; **${result}!**`
         break;
       }
       case "hp": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         const maxHP = STATS.HP.max(character);
         const prevHP = character.Data.Stats.HP ?? STATS.HP.default(character);
         const { value: nextHP, display } = modify(
@@ -245,13 +230,8 @@ ${message}; **${result}!**`
         break;
       }
       case "sanity": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         const maxSan = STATS.Sanity.max(character);
         const prevSan =
           character.Data.Stats.Sanity ?? STATS.Sanity.default(character);
@@ -269,13 +249,8 @@ ${message}; **${result}!**`
         break;
       }
       case "luck": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         const maxLuck = STATS.Luck.max(character);
         const prevLuck =
           character.Data.Stats.Luck ?? STATS.Luck.default(character);
@@ -293,13 +268,8 @@ ${message}; **${result}!**`
         break;
       }
       case "mark": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         const { skill, value, error } = findSkill(character, expr.skill, false);
         if (value && !character.Data.Improvements.includes(value)) {
           character.Data.Improvements = [...character.Data.Improvements, skill];
@@ -312,13 +282,8 @@ ${message}; **${result}!**`
         break;
       }
       case "improve": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         let improvements = character.Data.Improvements;
         if (expr.skill) {
           const { skill, error } = findSkill(character, expr.skill, false);
@@ -359,24 +324,14 @@ ${display}`);
         break;
       }
       case "stats": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         msg.reply(`**${character.Name}** ${listStats(character)}`);
         break;
       }
       case "set skill": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         const { skill, error } = expr.custom
           ? { skill: expr.skill }
           : findSkill(character, expr.skill);
@@ -390,13 +345,8 @@ ${display}`);
         break;
       }
       case "reset skill": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         const { skill, error } = findSkill(character, expr.skill, false, false);
         if (error) {
           msg.reply(error);
@@ -408,13 +358,8 @@ ${display}`);
         break;
       }
       case "sheet": {
-        const character = await DB.getCharacter(msg.guild.id, msg.author.id);
-        if (!character) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return;
         msg.reply(
           `**${character.Name}**
 Stats: ${listStats(character)}
