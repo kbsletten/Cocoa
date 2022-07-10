@@ -4,6 +4,7 @@ const { improve } = require("../coc/game");
 const { cocoaClient } = require("./cocoaClient");
 const DB = require("../db/character");
 const { getEditMessage } = require("./getEditMessage");
+const { choiceCallback } = require("./choice");
 
 cocoaClient.on("interactionCreate", async (interaction) => {
   try {
@@ -106,6 +107,11 @@ cocoaClient.on("interactionCreate", async (interaction) => {
             break;
           }
         }
+        break;
+      }
+      case "callback": {
+        choiceCallback(id, interaction);
+        break;
       }
     }
   } catch (e) {

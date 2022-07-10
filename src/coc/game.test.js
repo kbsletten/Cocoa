@@ -11,20 +11,29 @@ const dummyCharacter = {
 
 test("findSkill(..., 'Nonsense') returns an error", () => {
   expect(findSkill(dummyCharacter, "Nonsense")).toEqual({
-    error: "I'm sorry, I haven't heard of \"Nonsense\"",
+    error: "I'm sorry, I haven't heard of \"Nonsense\".",
   });
 });
 
 test("findSkill(..., 'Psych') returns an error", () => {
   expect(findSkill(dummyCharacter, "Psych")).toEqual({
-    error: "I'm sorry, I can't tell if you mean Psychoanalysis or Psychology",
+    error: "I'm sorry, I can't tell if you mean Psychoanalysis or Psychology.",
+    skillOptions: ["Psychoanalysis", "Psychology"],
   });
 });
 
 test("findSkill(..., 'Firearms') returns an error", () => {
   expect(findSkill(dummyCharacter, "Firearms")).toEqual({
     error:
-      "I'm sorry, I can't tell if you mean Firearms (Flamethrower), Firearms (Handgun), Firearms (Heavy Weapons), Firearms (Machine Gun), Firearms (Rifle/Shotgun), or Firearms (Submachine Gun)",
+      "I'm sorry, I can't tell if you mean Firearms (Flamethrower), Firearms (Handgun), Firearms (Heavy Weapons), Firearms (Machine Gun), Firearms (Rifle/Shotgun), or Firearms (Submachine Gun).",
+    skillOptions: [
+      "Firearms (Flamethrower)",
+      "Firearms (Handgun)",
+      "Firearms (Heavy Weapons)",
+      "Firearms (Machine Gun)",
+      "Firearms (Rifle/Shotgun)",
+      "Firearms (Submachine Gun)",
+    ],
   });
 });
 

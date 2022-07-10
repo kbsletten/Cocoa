@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 const DB = require("../db/character");
 const MockMessage = require("../mocks/mockMessage");
 const { v4: uuid } = require("uuid");
+const { choiceCallback } = require("./choice");
 
 const eventHandlers = {};
 jest.mock("../discord/cocoaClient", () => {
@@ -23,7 +24,12 @@ jest.mock("../db/character", () => {
     updateCharacterName: jest.fn(),
   };
 });
-jest;
+jest.mock("uuid", () => {
+  let next = 1;
+  return {
+    v4: () => (next++).toString(),
+  };
+});
 
 require("./cocoaClient");
 require("./message");
@@ -283,6 +289,26 @@ test("'skill Listen penalty' fails on 71", async () => {
   expect(message.reply)
     .toHaveBeenCalledWith(`Dummy Character attempts Listen (70%, Penalty: 1)!
 2d% (70, 30) + 1d10 (1) = 71; **Failure!**`);
+});
+
+test("'skill Firearm' asks for clarification", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+  jest.spyOn(global.Math, "random").mockImplementation(() => 0.1);
+
+  const message = new MockMessage("skill Firearm");
+  const dontWait = eventHandlers["messageCreate"](message);
+  await new Promise((resolve) => {
+    message.reply.mockImplementationOnce(() => resolve());
+  });
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(message.reply.mock.lastCall[0].content).toBe("I'm sorry, I can't tell if you mean Firearms (Flamethrower), Firearms (Handgun), Firearms (Heavy Weapons), Firearms (Machine Gun), Firearms (Rifle/Shotgun), or Firearms (Submachine Gun).");
+  const interaction = { update: jest.fn() };
+  await choiceCallback(message.reply.mock.lastCall[0].components[0].components[0].customId.split(':', 4)[1], interaction);
+  expect(interaction.update).toHaveBeenCalled();
+  await dontWait;
+  expect(message.reply).toHaveBeenCalledTimes(2);
+  expect(message.reply.mock.lastCall[0]).toBe(`Dummy Character attempts Firearms (Flamethrower) (10%)!
+1d% (10) + 1d10 (1) = 11; **Failure!**`);
 });
 
 test("'r 3d6 * 5' rolls three d6s", async () => {

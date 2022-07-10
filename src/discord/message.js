@@ -9,15 +9,15 @@ const {
   d6,
   die,
   findSkill,
-  fuzzySearch,
+  getSkill,
   improve,
   listSkills,
   listStats,
   modify,
-  skillRoll,
 } = require("../coc/game");
 const { STATS } = require("../coc/data");
 const { getEditMessage } = require("./getEditMessage");
+const { choice } = require("./choice");
 
 async function getAuthorDisplayName(msg) {
   const member = await msg.guild.members.fetch(msg.author);
@@ -31,6 +31,31 @@ async function getCurrentCharacter(msg, expr) {
   }
   msg.reply(`Whoops! You don't have any characters yet. Try "new character".`);
   return null;
+}
+
+async function getSkillClarify(msg, character, skillName, ...params) {
+  const { error, skillOptions, ...results } = findSkill(
+    character,
+    skillName,
+    ...params
+  );
+  return await new Promise(async (resolve) => {
+    if (skillOptions) {
+      const skill = await choice(
+        msg,
+        error,
+        skillOptions.map((skill) => {
+          return { label: skill, value: skill };
+        })
+      );
+      return resolve(getSkill(character, skill, ...params));
+    }
+    if (error) {
+      await msg.reply(error);
+      return resolve({ error });
+    }
+    return resolve(results);
+  });
 }
 
 cocoaClient.on("messageCreate", async (msg) => {
@@ -169,14 +194,17 @@ ${details.join("\n\n")}`
             : bonus < 0
             ? `, Penalty: ${-bonus}`
             : "";
-        const { error, message, skill, value, result } = skillRoll(
+        const { error, value, skill } = await getSkillClarify(
+          msg,
           character,
-          expr.skill,
-          bonus
+          expr.skill
         );
+        if (error) {
+          return;
+        }
+        const { message, result } = check(value, bonus);
         msg.reply(
-          error ??
-            `${character.Name} attempts ${skill} (${value}%${modifiers})!
+          `${character.Name} attempts ${skill} (${value}%${modifiers})!
 ${message}; **${result}!**`
         );
         break;
@@ -270,7 +298,15 @@ ${message}; **${result}!**`
       case "mark": {
         const character = await getCurrentCharacter(msg, expr);
         if (!character) return;
-        const { skill, value, error } = findSkill(character, expr.skill, false);
+        const { skill, value, error } = await getSkillClarify(
+          msg,
+          character,
+          expr.skill,
+          false
+        );
+        if (error) {
+          return;
+        }
         if (value && !character.Data.Improvements.includes(value)) {
           character.Data.Improvements = [...character.Data.Improvements, skill];
           await DB.updateCharacterData(character.CharacterId, character.Data);
@@ -286,10 +322,14 @@ ${message}; **${result}!**`
         if (!character) return;
         let improvements = character.Data.Improvements;
         if (expr.skill) {
-          const { skill, error } = findSkill(character, expr.skill, false);
+          const { skill, error } = await getSkillClarify(
+            msg,
+            character,
+            expr.skill,
+            false
+          );
           if (error) {
-            msg.reply(error);
-            break;
+            return;
           }
           improvements = [skill];
         }
@@ -298,13 +338,13 @@ ${message}; **${result}!**`
         }
         const results = [];
         for (const skill_name of improvements) {
-          const { skill, value, error } = findSkill(
+          const { skill, value, error } = await getSkillClarify(
+            msg,
             character,
             skill_name,
             false
           );
           if (error) {
-            results.push(error);
             continue;
           }
           const { success, message } = check(value);
@@ -334,7 +374,7 @@ ${display}`);
         if (!character) return;
         const { skill, error } = expr.custom
           ? { skill: expr.skill }
-          : findSkill(character, expr.skill);
+          : await getSkillClarify(msg, character, expr.skill);
         if (error) {
           msg.reply(error);
           break;
@@ -347,10 +387,15 @@ ${display}`);
       case "reset skill": {
         const character = await getCurrentCharacter(msg, expr);
         if (!character) return;
-        const { skill, error } = findSkill(character, expr.skill, false, false);
+        const { skill, error } = await getSkillClarify(
+          msg,
+          character,
+          expr.skill,
+          false,
+          false
+        );
         if (error) {
-          msg.reply(error);
-          break;
+          return;
         }
         delete character.Data.Skills[skill];
         await DB.updateCharacterData(character.CharacterId, character.Data);

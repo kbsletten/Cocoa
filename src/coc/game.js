@@ -51,9 +51,9 @@ function fuzzySearch(arr, term) {
   };
 }
 
-function findSkill(
+function getSkill(
   character,
-  skill_name,
+  skill,
   includeCharacteristics = true,
   includeDefaults = true
 ) {
@@ -61,27 +61,37 @@ function findSkill(
     ...(includeDefaults ? getDefaults(character, includeCharacteristics) : {}),
     ...character.Data.Skills,
   };
-  const { matching: skill_options, match: skill } = fuzzySearch(
-    Object.keys(skills),
-    skill_name
-  );
-  if (!skill_options.length) {
-    return { error: `I'm sorry, I haven't heard of "${skill_name}"` };
-  }
-  if (skill_options.length > 1) {
-    return {
-      error: `I'm sorry, I can't tell if you mean ${formatOptions(
-        skill_options
-      )}`,
-    };
-  }
   const value = skills[skill];
   return { skill, value };
 }
 
-function skillRoll(character, skill_name, bonus = 0) {
-  const { skill, value, error } = findSkill(character, skill_name);
-  return error ? { error } : { ...check(value, bonus), skill, value };
+function findSkill(
+  character,
+  skillName,
+  includeCharacteristics = true,
+  includeDefaults = true
+) {
+  const skills = {
+    ...(includeDefaults ? getDefaults(character, includeCharacteristics) : {}),
+    ...character.Data.Skills,
+  };
+  const { matching: skillOptions, match: skill } = fuzzySearch(
+    Object.keys(skills),
+    skillName
+  );
+  if (!skillOptions.length) {
+    return { error: `I'm sorry, I haven't heard of "${skillName}".` };
+  }
+  if (skillOptions.length > 1) {
+    return {
+      skillOptions: skillOptions,
+      error: `I'm sorry, I can't tell if you mean ${formatOptions(
+        skillOptions
+      )}.`,
+    };
+  }
+  const value = skills[skill];
+  return { skill, value };
 }
 
 function check(value, bonus = 0) {
@@ -198,9 +208,9 @@ module.exports = {
   die,
   findSkill,
   fuzzySearch,
+  getSkill,
   improve,
   listSkills,
   listStats,
   modify,
-  skillRoll,
 };

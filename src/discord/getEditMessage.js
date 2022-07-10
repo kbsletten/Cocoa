@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const { CORE, CHARACTERISTICS, getDefaults } = require("../coc/data");
 const { listSkills } = require("../coc/game");
+const Button = require("./button");
 
 const SKILL_NAMES = [
   ...Object.keys(CORE.skills),
@@ -19,11 +20,10 @@ function skillPageButton(page, currentPage, characterId) {
   const diff = page - currentPage;
   const prefix = diff === -1 ? "< " : diff < -1 ? "<< " : "";
   const postfix = diff === 1 ? " >" : diff > 1 ? " >>" : "";
-  return new Discord.MessageButton({
-    style: "PRIMARY",
-    label: `${prefix}${page + 1}${postfix}`,
-    customId: `editCharacter:${characterId}:skillPage:${page}`,
-  });
+  return Button.Navigation(
+    `${prefix}${page + 1}${postfix}`,
+    `editCharacter:${characterId}:skillPage:${page}`
+  );
 }
 
 function getEditMessage(
@@ -38,31 +38,28 @@ function getEditMessage(
     const charIndex = CHARACTERISTICS.indexOf(characteristic);
     if (charIndex > 0) {
       navigationComponents.push(
-        new Discord.MessageButton({
-          style: "PRIMARY",
-          label: `<< ${CHARACTERISTICS[charIndex - 1]}`,
-          customId: `editCharacter:${character.CharacterId}:characteristic:${
+        Button.Navigation(
+          `<< ${CHARACTERISTICS[charIndex - 1]}`,
+          `editCharacter:${character.CharacterId}:characteristic:${
             CHARACTERISTICS[charIndex - 1]
-          }`,
-        })
+          }`
+        )
       );
     }
     navigationComponents.push(
-      new Discord.MessageButton({
-        style: "PRIMARY",
-        label: "Done",
-        customId: `editCharacter:${character.CharacterId}:characteristic`,
-      })
+      Button.Navigation(
+        "Done",
+        `editCharacter:${character.CharacterId}:characteristic`
+      )
     );
     if (charIndex >= 0 && charIndex < CHARACTERISTICS.length - 1) {
       navigationComponents.push(
-        new Discord.MessageButton({
-          style: "PRIMARY",
-          label: `${CHARACTERISTICS[charIndex + 1]} >>`,
-          customId: `editCharacter:${character.CharacterId}:characteristic:${
+        Button.Navigation(
+          `${CHARACTERISTICS[charIndex + 1]} >>`,
+          `editCharacter:${character.CharacterId}:characteristic:${
             CHARACTERISTICS[charIndex + 1]
-          }`,
-        })
+          }`
+        )
       );
     }
     components.push(
@@ -96,31 +93,26 @@ function getEditMessage(
       }),
       new Discord.MessageActionRow({
         components: [
-          new Discord.MessageButton({
-            style: "SECONDARY",
-            label: "-5",
-            customId: `editCharacter:${character.CharacterId}:${characteristic}:minusFive`,
-          }),
-          new Discord.MessageButton({
-            style: "SECONDARY",
-            label: "-1",
-            customId: `editCharacter:${character.CharacterId}:${characteristic}:minusOne`,
-          }),
-          new Discord.MessageButton({
-            style: "SECONDARY",
-            label: "+1",
-            customId: `editCharacter:${character.CharacterId}:${characteristic}:plusOne`,
-          }),
-          new Discord.MessageButton({
-            style: "SECONDARY",
-            label: "+5",
-            customId: `editCharacter:${character.CharacterId}:${characteristic}:plusFive`,
-          }),
-          new Discord.MessageButton({
-            style: "DANGER",
-            label: "+d10",
-            customId: `editCharacter:${character.CharacterId}:${characteristic}:improve`,
-          }),
+          Button.Update(
+            "-5",
+            `editCharacter:${character.CharacterId}:${characteristic}:minusFive`
+          ),
+          Button.Update(
+            "-1",
+            `editCharacter:${character.CharacterId}:${characteristic}:minusOne`
+          ),
+          Button.Update(
+            "+1",
+            `editCharacter:${character.CharacterId}:${characteristic}:plusOne`
+          ),
+          Button.Update(
+            "+5",
+            `editCharacter:${character.CharacterId}:${characteristic}:plusFive`
+          ),
+          Button.Complete(
+            "+d10",
+            `editCharacter:${character.CharacterId}:${characteristic}:improve`
+          ),
         ],
       }),
       new Discord.MessageActionRow({
@@ -156,40 +148,34 @@ function getEditMessage(
       }),
       new Discord.MessageActionRow({
         components: [
-          new Discord.MessageButton({
-            style: "SECONDARY",
-            label: "-5",
-            customId: `editCharacter:${character.CharacterId}:${skill}:minusFive`,
-          }),
-          new Discord.MessageButton({
-            style: "SECONDARY",
-            label: "-1",
-            customId: `editCharacter:${character.CharacterId}:${skill}:minusOne`,
-          }),
-          new Discord.MessageButton({
-            style: "SECONDARY",
-            label: "+1",
-            customId: `editCharacter:${character.CharacterId}:${skill}:plusOne`,
-          }),
-          new Discord.MessageButton({
-            style: "SECONDARY",
-            label: "+5",
-            customId: `editCharacter:${character.CharacterId}:${skill}:plusFive`,
-          }),
-          new Discord.MessageButton({
-            style: "DANGER",
-            label: "+d10",
-            customId: `editCharacter:${character.CharacterId}:${skill}:improve`,
-          }),
+          Button.Update(
+            "-5",
+            `editCharacter:${character.CharacterId}:${skill}:minusFive`
+          ),
+          Button.Update(
+            "-1",
+            `editCharacter:${character.CharacterId}:${skill}:minusOne`
+          ),
+          Button.Update(
+            "+1",
+            `editCharacter:${character.CharacterId}:${skill}:plusOne`
+          ),
+          Button.Update(
+            "+5",
+            `editCharacter:${character.CharacterId}:${skill}:plusFive`
+          ),
+          Button.Complete(
+            "+d10",
+            `editCharacter:${character.CharacterId}:${skill}:improve`
+          ),
         ],
       }),
       new Discord.MessageActionRow({
         components: [
-          new Discord.MessageButton({
-            style: "PRIMARY",
-            label: "Done",
-            customId: `editCharacter:${character.CharacterId}:skillPage:${skillIndex}`,
-          }),
+          Button.Navigation(
+            "Done",
+            `editCharacter:${character.CharacterId}:skillPage:${skillIndex}`
+          ),
         ],
       })
     );
