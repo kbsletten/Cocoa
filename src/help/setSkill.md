@@ -14,4 +14,4 @@ Listen (40%)
 __Related Commands__
 **set custom skill** - Add a skill to your character sheet that's not included in the base game.
 **skill roll** - Roll a skill on your character sheet.
-**check** - Perform a custom skill check.
+**roll check** - Perform a custom skill check.

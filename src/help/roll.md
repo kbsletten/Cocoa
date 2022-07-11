@@ -14,4 +14,5 @@ roll (2d6 + 6) * 5
 (2d6 (4, 3) + 6) * 5 = 65
 ```
 __Related Commands__
-**command** - Description.
+**roll skill** - Roll a skill on your investigator's sheet.
+**roll check** - Perform a custom skill check.

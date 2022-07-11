@@ -1,19 +1,17 @@
-**Skill Roll**
-`skill <roll> [SKILL NAME] <bonus/penalty>`
+**Custom Check**
+`roll <check> [SKILL VALUE] [SKILL NAME] <bonus/penalty>`
 This command performs a skill check with a custom skill value and name, using the same logic as named skill checks. Bonuses and penalties will be respected and the degree of success will be returned.
 
 __Example__
 *Jane Doe*
 ```
-skill roll Listen
+roll 40 Underwater Basket Weaving penalty
 ```
 *Cocoa*
 ```
-Jane Doe attempts Listen (20%)!
-1d% (20) + 1d10 (0) = 20; Success!
+Jane Doe attempts Underwater Basket Weaving (40%, Penalty: 1)!
+2d% (80, 40) + 1d10 (9) = 89; Failure!
 ```
 __Related Commands__
-**set skill** - Add a skill to your character sheet.
 **set custom skill** - Add a skill to your character sheet that's not included in the base game.
-**reset skill** - Remove a skill from your character sheet.
-**check** - Perform a custom skill check.
+**roll** - Roll an arbitrary set of dice.

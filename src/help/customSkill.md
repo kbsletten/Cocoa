@@ -13,4 +13,4 @@ Underwater Basket Weaving (40%)
 ```
 __Related Commands__
 **skill roll** - Roll a skill on your character sheet.
-**check** - Perform a custom skill check.
+**roll check** - Perform a custom skill check.

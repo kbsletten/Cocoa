@@ -1,33 +1,46 @@
 Command
-    =   NEW WS CHARACTER WS n:NAME { return { 'command': 'new character', 'name': n }; }
-    /   NEW WS CHARACTER { return { 'command': 'new character' }; }
-    /   EDIT WS CHARACTER { return { 'command': 'edit character' }; }
-    /   RENAME WS CHARACTER WS n:NAME { return { 'command': 'rename character', 'name': n }; }
-    /   DELETE WS CHARACTER WS n:NAME { return { 'command': 'delete character', 'name': n }; }
-    /   LIST WS SERVER WS CHARACTERS { return { 'command': 'list server characters' }; }
-    /   LIST WS CHARACTERS { return { 'command': 'list characters' }; }
-    /   (SET WS)? SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n }; }
-    /   (SET WS)? CUSTOM WS SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n, 'custom': true }; }
-    /   RESET WS SKILL WS s:WORDS { return { 'command': 'reset skill', 'skill': s }; }
-    /   (SKILL (WS ROLL)? / CHECK) WS s:Skill { return { 'command': 'skill roll', ...s }; }
+    =   WS c:Command WS? { return c; }
     /   CHECK WS n:NUMBER WS s:Skill { return { 'command': 'check', 'value': n, ...s }; }
-    /   CHECK WS n:NUMBER { return { 'command': 'check', 'value': n }; }
-    /   ROLL WS d:Dice { return { 'command': 'roll', 'dice': d }; }
+    /   CHECK WS n:NUMBER { return { 'command': 'check', 'value': n, 'bonus': 0, 'penalty': 0 }; }
+    /   CUSTOM WS SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n, 'custom': true }; }
+    /   CREATE WS CHARACTER WS n:NAME { return { 'command': 'new character', 'name': n }; }
+    /   CREATE WS CHARACTER { return { 'command': 'new character' }; }
+    /   DELETE WS CHARACTER WS n:NAME { return { 'command': 'delete character', 'name': n }; }
+    /   EDIT WS CHARACTER { return { 'command': 'edit character' }; }
+    /   HELP WS h:Help { return { 'command': 'help', 'help': h }; }
+    /   HELP { return { 'command': 'help', 'help': 'help' }; }
     /   HP WS '+' WS? n:NUMBER { return { 'command': 'hp', 'add': n }; }
     /   HP WS '-' WS? n:NUMBER { return { 'command': 'hp', 'add': -n }; }
-    /   (SET WS)? HP WS n:NUMBER { return { 'command': 'hp', 'set': n }; }
-    /   SANITY WS '+' WS? n:NUMBER { return { 'command': 'sanity', 'add': n }; }
-    /   SANITY WS '-' WS? n:NUMBER { return { 'command': 'sanity', 'add': -n }; }
-    /   (SET WS)? SANITY WS n:NUMBER { return { 'command': 'sanity', 'set': n }; }
-    /   LUCK WS '+' WS? n:NUMBER { return { 'command': 'luck', 'add': n }; }
-    /   LUCK WS '-' WS? n:NUMBER { return { 'command': 'luck', 'add': -n }; }
-    /   (SET WS)? LUCK WS n:NUMBER { return { 'command': 'luck', 'set': n }; }
-    /   MARK WS s:WORDS { return { 'command': 'mark', 'skill': s }; }
+    /   HP WS n:NUMBER { return { 'command': 'hp', 'set': n }; }
     /   IMPROVE WS MARKED { return { 'command': 'improve' }; }
     /   IMPROVE WS s:WORDS { return { 'command': 'improve', 'skill': s }; }
-    /   STATS { return { 'command': 'stats' }; }
+    /   LIST WS CHARACTERS { return { 'command': 'list characters' }; }
+    /   LIST WS SERVER WS CHARACTERS { return { 'command': 'list server characters' }; }
+    /   LUCK WS '+' WS? n:NUMBER { return { 'command': 'luck', 'add': n }; }
+    /   LUCK WS '-' WS? n:NUMBER { return { 'command': 'luck', 'add': -n }; }
+    /   LUCK WS n:NUMBER { return { 'command': 'luck', 'set': n }; }
+    /   MARK WS s:WORDS { return { 'command': 'mark', 'skill': s }; }
+    /   NEW WS CHARACTER WS n:NAME { return { 'command': 'new character', 'name': n }; }
+    /   NEW WS CHARACTER { return { 'command': 'new character' }; }
+    /   RENAME WS CHARACTER WS n:NAME { return { 'command': 'rename character', 'name': n }; }
+    /   RESET WS SKILL WS s:WORDS { return { 'command': 'reset skill', 'skill': s }; }
+    /   RESET WS s:WORDS { return { 'command': 'reset skill', 'skill': s }; }
+    /   ROLL WS d:Dice { return { 'command': 'roll', 'dice': d }; }
+    /   ROLL WS (SKILL WS)? s:Skill { return { 'command': 'skill roll', ...s }; }
+    /   ROLL WS (CHECK WS)? n:NUMBER WS s:Skill { return { 'command': 'check', 'value': n, ...s }; }
+    /   ROLL WS (CHECK WS)? n:NUMBER { return { 'command': 'check', 'value': n, 'bonus': 0, 'penalty': 0 }; }
+    /   SANITY WS '+' WS? n:NUMBER { return { 'command': 'sanity', 'add': n }; }
+    /   SANITY WS '-' WS? n:NUMBER { return { 'command': 'sanity', 'add': -n }; }
+    /   SANITY WS n:NUMBER { return { 'command': 'sanity', 'set': n }; }
+    /   SET WS CUSTOM WS SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n, 'custom': true }; }
+    /   SET WS HP WS n:NUMBER { return { 'command': 'hp', 'set': n }; }
+    /   SET WS LUCK WS n:NUMBER { return { 'command': 'luck', 'set': n }; }
+    /   SET WS SANITY WS n:NUMBER { return { 'command': 'sanity', 'set': n }; }
+    /   SET WS SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n }; }
     /   SHEET { return { 'command': 'sheet' }; }
-    /   HELP WS h:Help { return { 'command': 'help', 'help': h }; }
+    /   SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n }; }
+    /   SKILL WS s:Skill { return { 'command': 'skill roll', ...s }; }
+    /   STATS { return { 'command': 'stats' }; }
     ;
 
 Skill
@@ -68,10 +81,10 @@ Help
     /   DELETE WS CHARACTER { return 'deleteCharacter'; }
     /   LIST WS CHARACTERS { return 'listCharacters'; }
     /   LIST WS SERVER WS CHARACTERS { return 'listServerCharacters'; }
-    /   SKILL { return 'skill'; }
+    /   (ROLL WS)? SKILL { return 'rollCheck'; }
     /   (SET WS)? CUSTOM WS SKILL { return 'customSkill'; }
     /   SET WS SKILL { return 'setSkill'; }
-    /   CHECK { return 'check'; }
+    /   (ROLL WS)? CHECK { return 'rollCheck'; }
     /   ROLL { return 'roll'; }
     /   HP { return 'hp'; }
     /   SANITY { return 'sanity'; }
@@ -85,35 +98,32 @@ Help
 
 BONUS
     =   'bonus'i
-    /   'bon'i &WS
-    /   'b'i &WS
     ;
 CHARACTER
     =   'character'i
-    /   'char'i &WS
-    /   'ch'i &WS
+    /   'investigator'i
     ;
 CHARACTERS
     =   'characters'i
-    /   CHARACTER
+    /   'investigators'i
     ;
 CHECK
     =   'check'i
-    /   'c'i &WS
     ;
 CUSTOM
     =   'custom'i
+    ;
+CREATE
+    =   'create'i
     ;
 DELETE
     =   'delete'i
     ;
 DIE
-    =   'die'i
-    /   'd'i
+    =   'd'i
     ;
 EDIT
     =   'edit'i
-    /   'e'i &WS
     ;
 HELP
     =   'help'i
@@ -127,7 +137,6 @@ IMPROVE
     ;
 LIST
     =   'list'i
-    /   'l'i &WS
     ;
 LUCK
     =   'luck'i
@@ -137,7 +146,6 @@ MARK
     ;
 MARKED
     =   'marked'i
-    /   MARK
     ;
 NAME
     =   [A-Za-z]+ (WS [A-Za-z]+)* { return text(); }
@@ -150,8 +158,6 @@ NUMBER
     ;
 PENALTY 
     =   'penalty'i
-    /   'pen'i &WS
-    /   'p'i &WS
     ;
 RENAME
     =   'rename'i
@@ -161,15 +167,13 @@ RESET
     ;
 ROLL
     =   'roll'i
-    /   'r'i &WS
+    /   'r'i
     ;
 SANITY
     =   'sanity'i
-    /   'san'i &WS
     ;
 SERVER
     =   'server'i
-    /   'serv'i &WS
     ;
 SET
     =   'set'i
@@ -179,8 +183,6 @@ SHEET
     ;
 SKILL
     =   'skill'i
-    /   'sk'i &WS
-    /   's'i &WS
     ;
 STATS
     =   'stats'i

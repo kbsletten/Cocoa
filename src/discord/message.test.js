@@ -528,3 +528,10 @@ for (const command of [
     expect(message.reply.mock.lastCall[0].length).toBeGreaterThan(100);
   });
 }
+
+test(`'help' returns the help text`, async () => {
+  const message = new MockMessage(`help`);
+  await eventHandlers["messageCreate"](message);
+  expect(message.reply).toHaveBeenCalled();
+  expect(message.reply.mock.lastCall[0].length).toBeGreaterThan(100);
+});
