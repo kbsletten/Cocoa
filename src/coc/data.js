@@ -35,7 +35,7 @@ const CORE = {
     Charm: 15,
     Climb: 20,
     "Credit Rating": 0,
-    "Cthuhlu Mythos": 0,
+    "Cthulhu Mythos": 0,
     Disguise: 5,
     Dodge: 0,
     "Drive Auto": 20,
