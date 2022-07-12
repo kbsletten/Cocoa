@@ -1,15 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 const sqlite3 = require("sqlite3");
+const { loadFile } = require("../file");
 const conn = new sqlite3.Database("./cocoa.sqlite3");
-
-function loadSql(filename) {
-  return new Promise((resolve, reject) =>
-    fs.readFile(path.join(__dirname, filename), (err, data) =>
-      err ? reject(err) : resolve(data.toString())
-    )
-  );
-}
 
 function allPromise(sql, ...params) {
   return new Promise((resolve, reject) => {
@@ -61,16 +54,16 @@ ${script}`);
 
 let isLoaded = false;
 const loading = (async function loadingFunction() {
-  const init = await loadSql("./init.sql");
+  const init = await loadFile("db/init.sql");
   await runAllSql(init);
   const versions = (await allPromise(`SELECT VersionId FROM AppVersions`)).map(it => it.VersionId);
   console.log(`Current versions: ${versions.join(", ")}`);
   if (!versions.includes("ServerCharacters-UserId")) {
-    const serverCharacterUserId = await loadSql("./ServerCharacters-UserId.sql");
+    const serverCharacterUserId = await loadFile("db/ServerCharacters-UserId.sql");
     await runAllSql(serverCharacterUserId);
   }
   if (!versions.includes("ServerCharacters-IsPrimary")) {
-    const serverCharacterIsPrimary = await loadSql("./ServerCharacters-IsPrimary.sql");
+    const serverCharacterIsPrimary = await loadFile("db/ServerCharacters-IsPrimary.sql");
     await runAllSql(serverCharacterIsPrimary);
   }
   isLoaded = true;

@@ -18,6 +18,7 @@ const {
 const { STATS } = require("../coc/data");
 const { getEditMessage } = require("./getEditMessage");
 const { choice } = require("./choice");
+const { loadFile } = require("../file");
 
 async function getAuthorDisplayName(msg) {
   const member = await msg.guild.members.fetch(msg.author);
@@ -413,12 +414,7 @@ Skills: ${listSkills(character)}`
         break;
       }
       case "help": {
-        const helpText = await new Promise((resolve, reject) =>
-          fs.readFile(
-            path.join(__dirname, `../help/${expr.help}.md`),
-            (err, data) => (err ? reject(err) : resolve(data.toString()))
-          )
-        );
+        const helpText = await loadFile(`help/${expr.help}.md`);
         msg.reply(helpText);
         break;
       }

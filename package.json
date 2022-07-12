@@ -4,9 +4,14 @@
   "description": "A Discord bot built to automate the Call of Cthulhu role playing game.",
   "main": "src/cocoa.js",
   "scripts": {
-    "build": "pegjs -o src/parser/command.gen.js src/parser/command.pegjs",
+    "build": "webpack --mode=production --node-env=production",
+    "build:dev": "webpack --mode=development",
+    "build:prod": "webpack --mode=production --node-env=production",
+    "prebuild": "pegjs -o src/parser/command.gen.js src/parser/command.pegjs",
+    "run": "nodemon ./dist/cocoa.js",
     "start": "nodemon src/cocoa.js",
-    "test": "jest"
+    "test": "jest",
+    "watch": "webpack --watch"
   },
   "repository": {
     "type": "git",
@@ -26,12 +31,21 @@
   "dependencies": {
     "discord.js": "^13.3.1",
     "dotenv": "^10.0.0",
-    "pegjs": "^0.10.0",
     "sqlite3": "^5.0.2",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.18.6",
+    "@babel/preset-env": "^7.18.6",
+    "@webpack-cli/generators": "^2.5.0",
+    "babel-loader": "^8.2.5",
+    "copy-webpack-plugin": "^11.0.0",
     "jest": "^28.1.2",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "pegjs": "^0.10.0",
+    "prettier": "^2.7.0",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-node-externals": "^3.0.0"
   }
 }
