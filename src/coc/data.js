@@ -137,7 +137,8 @@ function getDefaults(character, includeCharacteristics = true) {
           ...character.Data.Characteristics,
           Know: character.Data.Characteristics.EDU,
           Idea: character.Data.Characteristics.INT,
-          Sanity: character.Data.Stats.Sanity,
+          Sanity:
+            character.Data.Stats.Sanity ?? STATS.Sanity.default(character),
           Luck: character.Data.Stats.Luck,
         }
       : {}),
