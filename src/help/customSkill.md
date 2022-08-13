@@ -12,5 +12,7 @@ set custom skill Underwater Basket Weaving 40
 Underwater Basket Weaving (40%)
 ```
 __Related Commands__
+**set skill** - Add a skill from the base game to your character's sheet.
+**reset skill** - Remove a skill from your character's sheet.
 **skill roll** - Roll a skill on your character sheet.
 **roll check** - Perform a custom skill check.

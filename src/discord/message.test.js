@@ -301,13 +301,22 @@ test("'skill Firearm' asks for clarification", async () => {
     message.reply.mockImplementationOnce(() => resolve());
   });
   expect(DB.getCharacter).toHaveBeenCalled();
-  expect(message.reply.mock.lastCall[0].content).toBe("I'm sorry, I can't tell if you mean Firearms (Flamethrower), Firearms (Handgun), Firearms (Heavy Weapons), Firearms (Machine Gun), Firearms (Rifle/Shotgun), or Firearms (Submachine Gun).");
+  expect(message.reply.mock.lastCall[0].content).toBe(
+    "I'm sorry, I can't tell if you mean Firearms (Flamethrower), Firearms (Handgun), Firearms (Heavy Weapons), Firearms (Machine Gun), Firearms (Rifle/Shotgun), or Firearms (Submachine Gun)."
+  );
   const interaction = { update: jest.fn() };
-  await choiceCallback(message.reply.mock.lastCall[0].components[0].components[0].customId.split(':', 4)[1], interaction);
+  await choiceCallback(
+    message.reply.mock.lastCall[0].components[0].components[0].customId.split(
+      ":",
+      4
+    )[1],
+    interaction
+  );
   expect(interaction.update).toHaveBeenCalled();
   await dontWait;
   expect(message.reply).toHaveBeenCalledTimes(2);
-  expect(message.reply.mock.lastCall[0]).toBe(`Dummy Character attempts Firearms (Flamethrower) (10%)!
+  expect(message.reply.mock.lastCall[0])
+    .toBe(`Dummy Character attempts Firearms (Flamethrower) (10%)!
 1d% (10) + 1d10 (1) = 11; **Failure!**`);
 });
 
@@ -388,7 +397,22 @@ test("'mark Listen' marks the Listen skill for improvement", async () => {
   );
 });
 
-test("'improve marked' doesn't improve Listen skill on 70", async () => {
+test("'reset mark Listen' removes the mark from the Listen skill", async () => {
+  expect(dummyCharacter.Data.Improvements).toContain("Listen");
+
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+
+  const message = new MockMessage("reset mark Listen");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+  expect(DB.updateCharacterData).toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `Dummy Character's skill, Listen (70%) is not marked for improvement!`
+  );
+});
+
+test("'improve Listen' doesn't improve Listen skill on 70", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
   jest
     .spyOn(global.Math, "random")
@@ -424,6 +448,36 @@ test("'improve Listen' improves the Listen skill on 71", async () => {
     `**Listen (70%)**: 1d% (70) + 1d10 (1) = 71
 Improvement: 70 + 1d10 (4) = 74`
   );
+});
+
+test("'improve marked' improves multiple skills", async () => {
+  dummyCharacter.Data.Improvements = ["Listen", "Climb"];
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+  jest
+    .spyOn(global.Math, "random")
+    .mockImplementationOnce(() => 0.1)
+    .mockImplementationOnce(() => 0.7)
+    .mockImplementationOnce(() => 0.5)
+    .mockImplementationOnce(() => 0.5)
+    .mockImplementationOnce(() => 0.3);
+
+  try {
+    const message = new MockMessage("improve marked");
+    await eventHandlers["messageCreate"](message);
+    expect(DB.getCharacter).toHaveBeenCalled();
+    expect(dummyCharacter.Data.Skills.Listen).toBe(74);
+    expect(dummyCharacter.Data.Skills.Climb).toBe(24);
+    expect(DB.updateCharacterData).toHaveBeenCalled();
+    expect(message.reply).toHaveBeenCalledWith(
+      `**Listen (74%)**: 1d% (70) + 1d10 (1) = 71
+No improvement.
+
+**Climb (20%)**: 1d% (50) + 1d10 (5) = 55
+Improvement: 20 + 1d10 (4) = 24`
+    );
+  } finally {
+    delete dummyCharacter.Data.Skills.Climb;
+  }
 });
 
 test("'stats' displays your stats", async () => {
@@ -471,22 +525,23 @@ test("'rename character New Name' renames the character", async () => {
 });
 
 for (const command of [
-  "edit character",
   "delete character Dummy Character",
-  "rename character New Name",
-  "skill Listen 70",
-  "skill Listen bonus",
-  "list server characters",
-  "list characters",
+  "edit character",
   "hp +5",
-  "sanity -5",
+  "improve Listen",
+  "improve marked",
+  "list characters",
+  "list server characters",
   "luck 5",
   "mark Listen",
-  "improve marked",
-  "improve Listen",
-  "stats",
+  "rename character New Name",
+  "reset mark Listen",
   "reset skill Listen",
+  "sanity -5",
   "sheet",
+  "skill Listen 70",
+  "skill Listen bonus",
+  "stats",
 ]) {
   test(`'${command}' fails when you have no character`, async () => {
     DB.getCharacter.mockImplementationOnce(async () => null);
@@ -501,25 +556,27 @@ for (const command of [
 
 for (const command of [
   "character",
-  "new character",
-  "edit character",
-  "rename character",
+  "check",
   "delete character",
+  "edit character",
+  "hp",
+  "improve marked",
+  "improve",
   "list characters",
   "list server characters",
-  "skill",
-  "set skill",
-  "set custom skill",
-  "check",
-  "roll",
-  "hp",
-  "sanity",
   "luck",
   "mark",
-  "improve",
-  "improve marked",
-  "stats",
+  "new character",
+  "rename character",
+  "reset mark",
+  "reset skill",
+  "roll",
+  "sanity",
+  "set custom skill",
+  "set skill",
   "sheet",
+  "skill",
+  "stats",
 ]) {
   test(`'help ${command}' returns the help text`, async () => {
     const message = new MockMessage(`help ${command}`);

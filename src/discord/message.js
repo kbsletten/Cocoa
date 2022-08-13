@@ -71,6 +71,11 @@ cocoaClient.on("messageCreate", async (msg) => {
     // ¯\_(ツ)_/¯
     return;
   }
+  function replyNoCharacter() {
+    msg.reply(
+      `Whoops! You don't have any characters yet. Try "new character".`
+    );
+  }
   try {
     console.log(`${msg.content} => ${JSON.stringify(expr)}`);
     switch (expr.command) {
@@ -123,13 +128,13 @@ cocoaClient.on("messageCreate", async (msg) => {
         break;
       case "edit character": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         msg.reply(getEditMessage(character));
         break;
       }
       case "rename character": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         const oldName = character.Name;
         character.Name = expr.name;
         await DB.updateCharacterName(character.CharacterId, character.Name);
@@ -138,7 +143,7 @@ cocoaClient.on("messageCreate", async (msg) => {
       }
       case "delete character": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         if (character.Name === expr.name) {
           DB.deleteCharacter(character.CharacterId);
         }
@@ -148,12 +153,7 @@ cocoaClient.on("messageCreate", async (msg) => {
       case "list server characters":
         {
           const characters = await DB.listCharacters(msg.guild.id);
-          if (!characters.length) {
-            msg.reply(
-              `Whoops! You don't have any characters yet. Try "new character".`
-            );
-            break;
-          }
+          if (!characters.length) return replyNoCharacter();
           const details = characters.map(
             (character) =>
               `**${character.Name}**
@@ -172,12 +172,7 @@ ${details.join("\n\n")}`
         break;
       case "list characters": {
         const characters = await DB.listCharacters(msg.guild.id, msg.author.id);
-        if (!characters.length) {
-          msg.reply(
-            `Whoops! You don't have any characters yet. Try "new character".`
-          );
-          break;
-        }
+        if (!characters.length) return replyNoCharacter();
         msg.reply(
           `Here are your characters: ${characters
             .map((it) => it.Name)
@@ -187,7 +182,7 @@ ${details.join("\n\n")}`
       }
       case "skill roll": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         const bonus = expr.bonus - expr.penalty;
         const modifiers =
           bonus > 0
@@ -242,7 +237,7 @@ ${message}; **${result}!**`
       }
       case "hp": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         const maxHP = STATS.HP.max(character);
         const prevHP = character.Data.Stats.HP ?? STATS.HP.default(character);
         const { value: nextHP, display } = modify(
@@ -260,7 +255,7 @@ ${message}; **${result}!**`
       }
       case "sanity": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         const maxSan = STATS.Sanity.max(character);
         const prevSan =
           character.Data.Stats.Sanity ?? STATS.Sanity.default(character);
@@ -279,7 +274,7 @@ ${message}; **${result}!**`
       }
       case "luck": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         const maxLuck = STATS.Luck.max(character);
         const prevLuck =
           character.Data.Stats.Luck ?? STATS.Luck.default(character);
@@ -298,17 +293,14 @@ ${message}; **${result}!**`
       }
       case "mark": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         const { skill, value, error } = await getSkillClarify(
           msg,
           character,
           expr.skill,
           false
         );
-        if (error) {
-          return;
-        }
-        if (value && !character.Data.Improvements.includes(value)) {
+        if (skill && !character.Data.Improvements.includes(skill)) {
           character.Data.Improvements = [...character.Data.Improvements, skill];
           await DB.updateCharacterData(character.CharacterId, character.Data);
         }
@@ -318,9 +310,30 @@ ${message}; **${result}!**`
         );
         break;
       }
+      case "reset mark": {
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return replyNoCharacter();
+        const { skill, value, error } = await getSkillClarify(
+          msg,
+          character,
+          expr.skill,
+          false
+        );
+        if (skill && character.Data.Improvements.includes(skill)) {
+          character.Data.Improvements = character.Data.Improvements.filter(
+            (it) => it !== skill
+          );
+          await DB.updateCharacterData(character.CharacterId, character.Data);
+        }
+        msg.reply(
+          error ??
+            `${character.Name}'s skill, ${skill} (${value}%) is not marked for improvement!`
+        );
+        break;
+      }
       case "improve": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         let improvements = character.Data.Improvements;
         if (expr.skill) {
           const { skill, error } = await getSkillClarify(
@@ -330,15 +343,19 @@ ${message}; **${result}!**`
             false
           );
           if (error) {
+            msg.reply(error);
             return;
           }
           improvements = [skill];
         }
         if (!improvements.length) {
           msg.reply(`No skills marked for improvement.`);
+          return;
         }
         const results = [];
-        for (const skill_name of improvements) {
+        for (const skill_name of improvements.filter(
+          (it, index) => index === improvements.indexOf(it)
+        )) {
           const { skill, value, error } = await getSkillClarify(
             msg,
             character,
@@ -366,13 +383,13 @@ ${display}`);
       }
       case "stats": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         msg.reply(`**${character.Name}** ${listStats(character)}`);
         break;
       }
       case "set skill": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         const { skill, error } = expr.custom
           ? { skill: expr.skill }
           : await getSkillClarify(msg, character, expr.skill);
@@ -387,7 +404,7 @@ ${display}`);
       }
       case "reset skill": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         const { skill, error } = await getSkillClarify(
           msg,
           character,
@@ -405,7 +422,7 @@ ${display}`);
       }
       case "sheet": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return;
+        if (!character) return replyNoCharacter();
         msg.reply(
           `**${character.Name}**
 Stats: ${listStats(character)}

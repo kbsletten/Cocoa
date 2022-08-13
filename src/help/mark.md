@@ -12,5 +12,6 @@ mark Listen
 Jane Doe's skill, Listen (20%) is marked for improvement!
 ```
 __Related Commands__
+**reset mark** - Remove a marked skill.
 **improve** - Improve one specific skill.
 **improve marked** - Improve all marked skills.

@@ -16,4 +16,5 @@ No improvement.
 ```
 __Related Commands__
 **mark** - Mark a successful skill for improvement.
+**reset mark** - Remove a marked skill.
 **improve** - Improve one specific skill.

@@ -14,4 +14,5 @@ Improvement: 20 + 1d10 (6) = 26
 ```
 __Related Commands__
 **mark** - Mark a successful skill for improvement.
+**reset mark** - Remove a marked skill.
 **improve marked** - Improve all marked skills.
