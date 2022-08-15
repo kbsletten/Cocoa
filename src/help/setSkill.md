@@ -1,4 +1,4 @@
-**Custom Skill**
+**Set Skill**
 `<set> skill [SKILL NAME] [SKILL VALUE]`
 This command adds a skill to the current character with the specified value.
 

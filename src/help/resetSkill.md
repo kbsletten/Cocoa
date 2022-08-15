@@ -1,4 +1,4 @@
-**Title**
+**Reset Skill**
 `reset skill [SKILL NAME]`
 This command resets a skill on the current character to the default value.
 

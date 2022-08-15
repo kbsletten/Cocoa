@@ -1,4 +1,4 @@
-**Title**
+**Reset Marked Skill**
 `reset mark [SKILL NAME]`
 Remove a mark on your character sheet.
 
