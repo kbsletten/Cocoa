@@ -1,4 +1,4 @@
-const DB = require("./db");
+const DB = require("./util");
 const { v4: uuid } = require("uuid");
 
 function mapCharacter(character) {

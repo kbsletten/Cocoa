@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const DB = require("../db/character");
+const DB = require("../db");
 const MockMessage = require("../mocks/mockMessage");
 const { v4: uuid } = require("uuid");
 const { choiceCallback } = require("./choice");
@@ -14,20 +14,18 @@ jest.mock("../discord/cocoaClient", () => {
     },
   };
 });
-jest.mock("../db/character", () => {
+jest.mock("../db", () => {
   return {
+    getServerSettings: jest.fn(() => {
+      return { ServerId: "1337", Data: {} };
+    }),
+    updateServerSettings: jest.fn(),
     createCharacter: jest.fn(),
     deleteCharacter: jest.fn(),
     getCharacter: jest.fn(),
     listCharacters: jest.fn(),
     updateCharacterData: jest.fn(),
     updateCharacterName: jest.fn(),
-  };
-});
-jest.mock("uuid", () => {
-  let next = 1;
-  return {
-    v4: () => (next++).toString(),
   };
 });
 

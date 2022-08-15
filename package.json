@@ -7,7 +7,7 @@
     "build": "webpack --mode=production --node-env=production",
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
-    "prebuild": "pegjs -o src/parser/command.gen.js src/parser/command.pegjs",
+    "prebuild": "pegjs -o src/parser/command.gen.js src/parser/command.pegjs && pegjs -o src/parser/adminCommand.gen.js src/parser/adminCommand.pegjs",
     "run": "nodemon ./dist/cocoa.js",
     "start": "nodemon src/cocoa.js",
     "test": "jest",

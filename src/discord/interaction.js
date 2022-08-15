@@ -1,12 +1,14 @@
 const Discord = require("discord.js");
-const { CHARACTERISTICS, getDefaults } = require("../coc/data");
+const { GAMES, CHARACTERISTICS, getDefaults } = require("../coc/data");
 const { improve } = require("../coc/game");
 const { cocoaClient } = require("./cocoaClient");
-const DB = require("../db/character");
+const DB = require("../db");
 const { getEditMessage } = require("./getEditMessage");
 const { choiceCallback } = require("./choice");
 
 cocoaClient.on("interactionCreate", async (interaction) => {
+  const serverSettings = await DB.getServerSettings(interaction.guild.id);
+  const game = GAMES[serverSettings.Data["Game"] ?? "CORE"];
   try {
     const [command, id, operation, value] = interaction.customId.split(":", 4);
     switch (command) {
@@ -16,6 +18,7 @@ cocoaClient.on("interactionCreate", async (interaction) => {
           case "characteristic": {
             interaction.update(
               getEditMessage(
+                game,
                 character,
                 interaction.isSelectMenu() ? interaction.values[0] : value
               )
@@ -24,13 +27,14 @@ cocoaClient.on("interactionCreate", async (interaction) => {
           }
           case "skillPage": {
             interaction.update(
-              getEditMessage(character, undefined, parseInt(value))
+              getEditMessage(game, character, undefined, parseInt(value))
             );
             break;
           }
           case "skill": {
             interaction.update(
               getEditMessage(
+                game,
                 character,
                 undefined,
                 undefined,
@@ -42,7 +46,7 @@ cocoaClient.on("interactionCreate", async (interaction) => {
           default: {
             switch (value) {
               case "improve": {
-                const { display } = improve(character, operation);
+                const { display } = improve(game, character, operation);
                 await DB.updateCharacterData(
                   character.CharacterId,
                   character.Data
@@ -65,7 +69,7 @@ cocoaClient.on("interactionCreate", async (interaction) => {
               }
               default:
                 {
-                  const defaults = getDefaults(character);
+                  const defaults = getDefaults(game, character);
                   const isCharacteristic = CHARACTERISTICS.includes(operation);
                   const pool = isCharacteristic
                     ? character.Data.Characteristics
@@ -95,6 +99,7 @@ cocoaClient.on("interactionCreate", async (interaction) => {
                   );
                   interaction.update(
                     getEditMessage(
+                      game,
                       character,
                       isCharacteristic ? operation : undefined,
                       undefined,

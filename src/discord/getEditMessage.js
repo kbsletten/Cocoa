@@ -1,21 +1,20 @@
 const Discord = require("discord.js");
-const { CORE, CHARACTERISTICS, getDefaults } = require("../coc/data");
+const { CHARACTERISTICS, getDefaults } = require("../coc/data");
 const { listSkills } = require("../coc/game");
 const Button = require("./button");
-
-const SKILL_NAMES = [
-  ...Object.keys(CORE.skills),
-  ...Object.keys(CORE.uncommon),
-  ...Object.keys(CORE.modern),
-].sort();
-const SKILL_PAGE_SIZE = 25;
-const SKILL_PAGES = Math.ceil(SKILL_NAMES.length / SKILL_PAGE_SIZE);
 
 function page(arr, pageSize, page) {
   return arr.slice(pageSize * page, pageSize * page + pageSize);
 }
 
-function skillPageButton(page, currentPage, characterId) {
+function skillPageButton(game, page, currentPage, characterId) {
+  const SKILL_NAMES = [
+    ...Object.keys(game.skills),
+    ...Object.keys(game.uncommon),
+  ].sort();
+  const SKILL_PAGE_SIZE = 25;
+  const SKILL_PAGES = Math.ceil(SKILL_NAMES.length / SKILL_PAGE_SIZE);
+
   if (page < 0 || page >= SKILL_PAGES || page === currentPage) return null;
   const diff = page - currentPage;
   const prefix = diff === -1 ? "< " : diff < -1 ? "<< " : "";
@@ -27,11 +26,19 @@ function skillPageButton(page, currentPage, characterId) {
 }
 
 function getEditMessage(
+  game,
   character,
   characteristic = null,
   skillPage = 0,
   skill = null
 ) {
+  const SKILL_NAMES = [
+    ...Object.keys(game.skills),
+    ...Object.keys(game.uncommon),
+  ].sort();
+  const SKILL_PAGE_SIZE = 25;
+  const SKILL_PAGES = Math.ceil(SKILL_NAMES.length / SKILL_PAGE_SIZE);
+
   const components = [];
   if (characteristic) {
     const navigationComponents = [];
@@ -121,7 +128,7 @@ function getEditMessage(
     );
   } else if (skill) {
     const skills = {
-      ...getDefaults(character),
+      ...getDefaults(game, character),
       ...character.Data.Skills,
     };
     const skillIndex = Math.floor(SKILL_NAMES.indexOf(skill) / SKILL_PAGE_SIZE);
@@ -207,10 +214,25 @@ function getEditMessage(
       }),
       new Discord.MessageActionRow({
         components: [
-          skillPageButton(0, skillPage, character.CharacterId),
-          skillPageButton(skillPage - 1, skillPage, character.CharacterId),
-          skillPageButton(skillPage + 1, skillPage, character.CharacterId),
-          skillPageButton(SKILL_PAGES - 1, skillPage, character.CharacterId),
+          skillPageButton(game, 0, skillPage, character.CharacterId),
+          skillPageButton(
+            game,
+            skillPage - 1,
+            skillPage,
+            character.CharacterId
+          ),
+          skillPageButton(
+            game,
+            skillPage + 1,
+            skillPage,
+            character.CharacterId
+          ),
+          skillPageButton(
+            game,
+            SKILL_PAGES - 1,
+            skillPage,
+            character.CharacterId
+          ),
         ].filter(
           (it, index, arr) =>
             it &&
@@ -236,7 +258,7 @@ function getEditMessage(
           }),
           {
             name: "Skills",
-            value: listSkills(character) || "Not set",
+            value: listSkills(game, character) || "Not set",
           },
         ],
       }),

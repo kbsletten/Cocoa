@@ -1,5 +1,3 @@
-const fs = require("fs");
-const path = require("path");
 const sqlite3 = require("sqlite3");
 const { loadFile } = require("../file");
 const conn = new sqlite3.Database("./cocoa.sqlite3");

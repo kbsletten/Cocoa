@@ -52,13 +52,14 @@ function fuzzySearch(arr, term) {
 }
 
 function getSkill(
+  game,
   character,
   skill,
   includeCharacteristics = true,
   includeDefaults = true
 ) {
   const skills = {
-    ...(includeDefaults ? getDefaults(character, includeCharacteristics) : {}),
+    ...(includeDefaults ? getDefaults(game, character, includeCharacteristics) : {}),
     ...character.Data.Skills,
   };
   const value = skills[skill];
@@ -66,13 +67,14 @@ function getSkill(
 }
 
 function findSkill(
+  game,
   character,
   skillName,
   includeCharacteristics = true,
   includeDefaults = true
 ) {
   const skills = {
-    ...(includeDefaults ? getDefaults(character, includeCharacteristics) : {}),
+    ...(includeDefaults ? getDefaults(game, character, includeCharacteristics) : {}),
     ...character.Data.Skills,
   };
   const { matching: skillOptions, match: skill } = fuzzySearch(
@@ -150,13 +152,13 @@ function modify(current, max, add = undefined, set = undefined) {
   };
 }
 
-function improve(character, skill_or_characteristic) {
+function improve(game, character, skill_or_characteristic) {
   const pool = CHARACTERISTICS.includes(skill_or_characteristic)
     ? character.Data.Characteristics
     : character.Data.Skills;
   const improvement = d10();
   const oldValue = isNaN(pool[skill_or_characteristic])
-    ? getDefaults(character)[skill_or_characteristic] ?? 0
+    ? getDefaults(game, character)[skill_or_characteristic] ?? 0
     : pool[skill_or_characteristic];
   const newValue = Math.min(99, oldValue + improvement.total);
   pool[skill_or_characteristic] = newValue;
@@ -179,13 +181,13 @@ function listStats(character) {
     .join(", ");
 }
 
-function listSkills(character) {
+function listSkills(game, character) {
   const skills = {
-    ...getDefaults(character, false),
+    ...getDefaults(game, character, false),
     ...character.Data.Skills,
   };
   const skillNames = [
-    ...character.Data.Improvements,
+    ...character.Data.Improvements.filter(it => skills[it]),
     ...Object.keys(character.Data.Skills),
   ]
     .sort()

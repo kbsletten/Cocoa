@@ -121,17 +121,42 @@ const CORE = {
     "Lore (Yaddithian)": 1,
     "Read Lips": 1,
   },
-  modern: {
+};
+
+const MODERN = {
+  ...CORE,
+  skills: {
+    ...CORE.skills,
     "Computer Use": 5,
     Electronics: 1,
   },
 };
 
-function getDefaults(character, includeCharacteristics = true) {
+const KIDS = {
+  skills: {
+    "Be a Pal": 10,
+    "Be Bossy": 15,
+    "Be Sneaky": 20,
+    Dodge: 0,
+    Fighting: 25,
+    "First Aid": 30,
+    "Fix Stuff": 10,
+    "Gym Class": 20,
+    Nature: 10,
+    "Notice Stuff": 25,
+    "Play With Matches": 5,
+    "Reading, Writing, and Arithmatic": 25,
+    "Science Class": 10,
+    "Spooky Stuff": 5,
+    Taunt: 5,
+  },
+  uncommon: {},
+};
+
+function getDefaults(game, character, includeCharacteristics = true) {
   return {
-    ...CORE.skills,
-    ...CORE.uncommon,
-    ...CORE.modern,
+    ...game.skills,
+    ...game.uncommon,
     ...(includeCharacteristics
       ? {
           ...character.Data.Characteristics,
@@ -177,7 +202,11 @@ const STATS = {
 
 module.exports = {
   CHARACTERISTICS,
-  CORE,
+  GAMES: {
+    CORE,
+    MODERN,
+    KIDS,
+  },
   STATS,
   getDefaults,
 };

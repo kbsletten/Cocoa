@@ -13,3 +13,8 @@ CREATE TABLE IF NOT EXISTS ServerCharacters (
 CREATE TABLE IF NOT EXISTS AppVersions (
     VersionId TEXT
 );
+
+CREATE TABLE IF NOT EXISTS ServerSettings (
+    ServerId TEXT,
+    Data TEXT
+);

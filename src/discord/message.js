@@ -1,9 +1,7 @@
-const fs = require("fs");
-const path = require("path");
 const Discord = require("discord.js");
 const { cocoaClient } = require("./cocoaClient");
 const parser = require("../parser/command.gen");
-const DB = require("../db/character");
+const DB = require("../db");
 const {
   check,
   d6,
@@ -15,7 +13,7 @@ const {
   listStats,
   modify,
 } = require("../coc/game");
-const { STATS } = require("../coc/data");
+const { GAMES, STATS } = require("../coc/data");
 const { getEditMessage } = require("./getEditMessage");
 const { choice } = require("./choice");
 const { loadFile } = require("../file");
@@ -34,8 +32,9 @@ async function getCurrentCharacter(msg, expr) {
   return null;
 }
 
-async function getSkillClarify(msg, character, skillName, ...params) {
+async function getSkillClarify(msg, game, character, skillName, ...params) {
   const { error, skillOptions, ...results } = findSkill(
+    game,
     character,
     skillName,
     ...params
@@ -49,7 +48,7 @@ async function getSkillClarify(msg, character, skillName, ...params) {
           return { label: skill, value: skill };
         })
       );
-      return resolve(getSkill(character, skill, ...params));
+      return resolve(getSkill(game, character, skill, ...params));
     }
     if (error) {
       await msg.reply(error);
@@ -76,6 +75,8 @@ cocoaClient.on("messageCreate", async (msg) => {
       `Whoops! You don't have any characters yet. Try "new character".`
     );
   }
+  const serverSettings = await DB.getServerSettings(msg.guild.id);
+  const game = GAMES[serverSettings.Data["Game"] ?? "CORE"];
   try {
     console.log(`${msg.content} => ${JSON.stringify(expr)}`);
     switch (expr.command) {
@@ -129,7 +130,7 @@ cocoaClient.on("messageCreate", async (msg) => {
       case "edit character": {
         const character = await getCurrentCharacter(msg, expr);
         if (!character) return replyNoCharacter();
-        msg.reply(getEditMessage(character));
+        msg.reply(getEditMessage(game, character));
         break;
       }
       case "rename character": {
@@ -161,7 +162,7 @@ ${listStats(character)}
 ${Object.entries(character.Data.Characteristics)
   .map(([char, value]) => `${char}: ${value}`)
   .join(", ")}
-Skills: ${listSkills(character)}`
+Skills: ${listSkills(game, character)}`
           );
           msg.reply(
             `Here are all the characters on the server:
@@ -192,6 +193,7 @@ ${details.join("\n\n")}`
             : "";
         const { error, value, skill } = await getSkillClarify(
           msg,
+          game,
           character,
           expr.skill
         );
@@ -296,6 +298,7 @@ ${message}; **${result}!**`
         if (!character) return replyNoCharacter();
         const { skill, value, error } = await getSkillClarify(
           msg,
+          game,
           character,
           expr.skill,
           false
@@ -315,6 +318,7 @@ ${message}; **${result}!**`
         if (!character) return replyNoCharacter();
         const { skill, value, error } = await getSkillClarify(
           msg,
+          game,
           character,
           expr.skill,
           false
@@ -338,6 +342,7 @@ ${message}; **${result}!**`
         if (expr.skill) {
           const { skill, error } = await getSkillClarify(
             msg,
+            game,
             character,
             expr.skill,
             false
@@ -348,16 +353,12 @@ ${message}; **${result}!**`
           }
           improvements = [skill];
         }
-        if (!improvements.length) {
-          msg.reply(`No skills marked for improvement.`);
-          return;
-        }
         const results = [];
         for (const skill_name of improvements.filter(
           (it, index) => index === improvements.indexOf(it)
         )) {
-          const { skill, value, error } = await getSkillClarify(
-            msg,
+          const { skill, value, error } = await findSkill(
+            game,
             character,
             skill_name,
             false
@@ -368,7 +369,7 @@ ${message}; **${result}!**`
           const { success, message } = check(value);
           let display = "No improvement.";
           if (!success) {
-            display = `Improvement: ${improve(character, skill).display}`;
+            display = `Improvement: ${improve(game, character, skill).display}`;
           }
           results.push(`**${skill} (${value}%)**: ${message}
 ${display}`);
@@ -378,7 +379,7 @@ ${display}`);
         );
         await DB.updateCharacterData(character.CharacterId, character.Data);
 
-        msg.reply(results.join("\n\n"));
+        msg.reply(results.join("\n\n") || `No skills marked for improvement.`);
         break;
       }
       case "stats": {
@@ -392,14 +393,14 @@ ${display}`);
         if (!character) return replyNoCharacter();
         const { skill, error } = expr.custom
           ? { skill: expr.skill }
-          : await getSkillClarify(msg, character, expr.skill);
+          : await getSkillClarify(msg, game, character, expr.skill);
         if (error) {
           msg.reply(error);
           break;
         }
         character.Data.Skills[skill] = Math.min(99, Math.max(0, expr.value));
         await DB.updateCharacterData(character.CharacterId, character.Data);
-        msg.reply(listSkills(character));
+        msg.reply(listSkills(game, character));
         break;
       }
       case "reset skill": {
@@ -407,6 +408,7 @@ ${display}`);
         if (!character) return replyNoCharacter();
         const { skill, error } = await getSkillClarify(
           msg,
+          game,
           character,
           expr.skill,
           false,
@@ -417,7 +419,7 @@ ${display}`);
         }
         delete character.Data.Skills[skill];
         await DB.updateCharacterData(character.CharacterId, character.Data);
-        msg.reply(listSkills(character));
+        msg.reply(listSkills(game, character));
         break;
       }
       case "sheet": {
@@ -426,7 +428,7 @@ ${display}`);
         msg.reply(
           `**${character.Name}**
 Stats: ${listStats(character)}
-Skills: ${listSkills(character)}`
+Skills: ${listSkills(game, character)}`
         );
         break;
       }
