@@ -198,6 +198,11 @@ const STATS = {
     max: (character) => 99 - (character.Data.Skills["Cthuhlu Mythos"] ?? 0),
   },
   Luck: { default: rollLuck, max: () => 99 },
+  MP: {
+    default: (character) => STATS.MP.max(character),
+    max: (character) =>
+      Math.floor((character.Data.Characteristics.POW ?? 40) / 5),
+  },
 };
 
 module.exports = {

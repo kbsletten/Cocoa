@@ -79,3 +79,22 @@ test(`'Luck' default and max work`, () => {
   expect(STATS.Luck.default()).toBe(30);
   expect(STATS.Luck.max()).toBe(99);
 });
+
+test(`'MP' default and max work`, () => {
+  expect(
+    STATS.MP.default({
+      Data: {
+        Characteristics: {},
+      },
+    })
+  ).toBe(8);
+  expect(
+    STATS.MP.default({
+      Data: {
+        Characteristics: {
+          POW: 50,
+        },
+      },
+    })
+  ).toBe(10);
+});

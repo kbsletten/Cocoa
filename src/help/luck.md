@@ -14,4 +14,6 @@ Jane Doe's Luck: 60/99 (+10)
 ```
 __Related Commands__
 **hp** - Modify your character's HP.
+**mp** - Modify your character's MP.
 **sanity** - Modify your character's Sanity.
+**sheet** - View your character's stats.

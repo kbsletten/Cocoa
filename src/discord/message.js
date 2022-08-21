@@ -293,6 +293,25 @@ ${message}; **${result}!**`
         msg.reply(`${character.Name}'s Luck: ${display}`);
         break;
       }
+      case "magic": {
+        const character = await getCurrentCharacter(msg, expr);
+        if (!character) return replyNoCharacter();
+        const maxMP = STATS.MP.max(character);
+        const prevMP =
+          character.Data.Stats.MP ?? STATS.MP.default(character);
+        const { value: nextMP, display } = modify(
+          prevMP,
+          maxMP,
+          expr.add,
+          expr.set
+        );
+        if (nextMP !== prevMP) {
+          character.Data.Stats.MP = nextMP;
+          await DB.updateCharacterData(character.CharacterId, character.Data);
+        }
+        msg.reply(`${character.Name}'s MP: ${display}`);
+        break;
+      }
       case "mark": {
         const character = await getCurrentCharacter(msg, expr);
         if (!character) return replyNoCharacter();

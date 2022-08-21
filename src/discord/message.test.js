@@ -168,7 +168,7 @@ test("'list server characters' lists the characters on the server", async () => 
     .toHaveBeenCalledWith(`Here are all the characters on the server:
 
 **Dummy Character**
-HP: 10/10, Luck: 75/99, Sanity: 50/99
+HP: 10/10, Luck: 75/99, MP: 10/10, Sanity: 50/99
 STR: 50, CON: 50, DEX: 50, INT: 50, SIZ: 50, POW: 50, APP: 50, EDU: 50
 Skills: Not set`);
 });
@@ -382,6 +382,16 @@ test("'luck 10' sets the luck to 10", async () => {
   );
 });
 
+test("'magic 5' sets the magic points to 5", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+
+  const message = new MockMessage("magic 5");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(DB.updateCharacterData).toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(`Dummy Character's MP: 5/10 (-5)`);
+});
+
 test("'mark Listen' marks the Listen skill for improvement", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
 
@@ -484,7 +494,7 @@ test("'stats' displays your stats", async () => {
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `**Dummy Character** HP: 10/10, Luck: 10/99, Sanity: 10/99`
+    `**Dummy Character** HP: 10/10, Luck: 10/99, MP: 5/10, Sanity: 10/99`
   );
 });
 
@@ -505,7 +515,7 @@ test("'sheet' displays your character sheet", async () => {
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
     `**Dummy Character**
-Stats: HP: 10/10, Luck: 10/99, Sanity: 10/99
+Stats: HP: 10/10, Luck: 10/99, MP: 5/10, Sanity: 10/99
 Skills: Not set`
   );
 });
@@ -531,6 +541,7 @@ for (const command of [
   "list characters",
   "list server characters",
   "luck 5",
+  "magic 5",
   "mark Listen",
   "rename character New Name",
   "reset mark Listen",
@@ -563,6 +574,7 @@ for (const command of [
   "list characters",
   "list server characters",
   "luck",
+  "magic",
   "mark",
   "new character",
   "rename character",

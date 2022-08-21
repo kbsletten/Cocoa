@@ -13,5 +13,6 @@ set hp 10
 Jane Doe's HP: 10/14 (-4)
 ```
 __Related Commands__
-**sanity** - Modify your character's Sanity.
 **luck** - Modify your character's Luck.
+**mp** - Modify your character's MP.
+**sanity** - Modify your character's Sanity.

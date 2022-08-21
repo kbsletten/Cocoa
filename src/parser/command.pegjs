@@ -18,6 +18,8 @@ Command
     /   LUCK WS n:MOD { return { 'command': 'luck', 'add': n }; }
     /   LUCK WS n:NUMBER { return { 'command': 'luck', 'set': n }; }
     /   MARK WS s:WORDS { return { 'command': 'mark', 'skill': s }; }
+    /   MAGIC WS n:MOD { return { 'command': 'magic', 'add': n }; }
+    /   MAGIC WS n:NUMBER { return { 'command': 'magic', 'set': n }; }
     /   NEW WS CHARACTER WS n:NAME { return { 'command': 'new character', 'name': n }; }
     /   NEW WS CHARACTER { return { 'command': 'new character' }; }
     /   RENAME WS CHARACTER WS n:NAME { return { 'command': 'rename character', 'name': n }; }
@@ -81,6 +83,7 @@ Help
     /   LIST WS CHARACTERS { return 'listCharacters'; }
     /   LIST WS SERVER WS CHARACTERS { return 'listServerCharacters'; }
     /   LUCK { return 'luck'; }
+    /   MAGIC { return 'magic'; }
     /   MARK { return 'mark'; }
     /   NEW WS CHARACTER { return 'newCharacter'; }
     /   RENAME WS CHARACTER { return 'renameCharacter'; }
@@ -140,6 +143,10 @@ LIST
     ;
 LUCK
     =   'luck'i
+    ;
+MAGIC
+    =   'magic'i
+    /   'mp'i
     ;
 MARK
     =   'mark'i

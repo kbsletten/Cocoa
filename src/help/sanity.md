@@ -15,3 +15,5 @@ Jane Doe's Sanity: 60/99 (+10)
 __Related Commands__
 **hp** - Modify your character's HP.
 **luck** - Modify your character's Luck.
+**mp** - Modify your character's MP.
+**sheet** - View your character's stats.
