@@ -25,7 +25,7 @@ cocoaClient.on("messageCreate", async (msg) => {
     const serverSettings = await DB.getServerSettings(msg.guild.id);
     switch (expr.adminCommand) {
       case "server settings": {
-        msg.reply(getServerSettingsMessage(serverSettings));
+        await msg.reply(getServerSettingsMessage(serverSettings));
         break;
       }
       case "admin channel": {
@@ -35,7 +35,7 @@ cocoaClient.on("messageCreate", async (msg) => {
           ? undefined
           : msg.channel.id;
         await DB.updateServerSettings(msg.guild.id, serverSettings.Data);
-        msg.reply(
+        await msg.reply(
           isAdminChannel
             ? `Admin channel un-set.`
             : `You will receive admin messages in this channel.`
@@ -47,7 +47,7 @@ cocoaClient.on("messageCreate", async (msg) => {
       }
     }
   } catch (e) {
-    msg.reply(
+    await msg.reply(
       `:head_bandage: I'm really sorry, but something has gone terribly wrong.`
     );
     console.error("Failed to process message", e);

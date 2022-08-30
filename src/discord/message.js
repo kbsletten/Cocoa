@@ -28,7 +28,7 @@ async function getCurrentCharacter(msg, expr) {
   if (character) {
     return character;
   }
-  msg.reply(`Whoops! You don't have any characters yet. Try "new character".`);
+  await msg.reply(`Whoops! You don't have any characters yet. Try "new character".`);
   return null;
 }
 
@@ -70,13 +70,25 @@ cocoaClient.on("messageCreate", async (msg) => {
     // ¯\_(ツ)_/¯
     return;
   }
-  function replyNoCharacter() {
-    msg.reply(
+  async function replyNoCharacter() {
+    await msg.reply(
       `Whoops! You don't have any characters yet. Try "new character".`
     );
   }
   const serverSettings = await DB.getServerSettings(msg.guild.id);
   const game = GAMES[serverSettings.Data["Game"] ?? "CORE"];
+  async function notifyAdmin(...msg) {
+    if (serverSettings.Data.AdminChannel) {
+      const channel = cocoaClient.channels.cache.get(
+        serverSettings.Data.AdminChannel
+      );
+      if (channel) {
+        await channel.send(
+          ...msg
+        );
+      }
+    }
+  }
   async function checkKarma(character, success) {
     if (serverSettings.Data.Karma !== "On") {
       return false;
@@ -85,16 +97,7 @@ cocoaClient.on("messageCreate", async (msg) => {
       success <= 0 &&
       Math.random() * 100 < (character.Data.Meta?.Karma ?? 0)
     ) {
-      if (serverSettings.Data.AdminChannel) {
-        const channel = cocoaClient.channels.cache.get(
-          serverSettings.Data.AdminChannel
-        );
-        if (channel) {
-          channel.send(
-            `${character.Name} got a karmic reroll (Karma: ${character.Data.Meta.Karma})`
-          );
-        }
-      }
+      await notifyAdmin(`${character.Name} got a karmic reroll (Karma: ${character.Data.Meta.Karma})`)
       return true;
     }
     if (success > 0) {
@@ -102,7 +105,9 @@ cocoaClient.on("messageCreate", async (msg) => {
     } else {
       character.Data.Meta.Karma += success < 0 ? 15 : 5;
     }
-    console.log(`${character.Name}'s Karma updated: ${character.Data.Meta.Karma}`);
+    await notifyAdmin(
+      `${character.Name}'s Karma updated: ${character.Data.Meta.Karma}`
+    );
     await DB.updateCharacterData(character.CharacterId, character.Data);
     return false;
   }
@@ -138,7 +143,7 @@ cocoaClient.on("messageCreate", async (msg) => {
           character.Name,
           JSON.stringify(character.Data)
         );
-        msg.reply({
+        await msg.reply({
           content: `Created a new character named ${expr.name}!`,
           embeds: [
             new Discord.MessageEmbed({
@@ -158,32 +163,32 @@ cocoaClient.on("messageCreate", async (msg) => {
         break;
       case "edit character": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
-        msg.reply(getEditMessage(game, character));
+        if (!character) return await replyNoCharacter();
+        await msg.reply(getEditMessage(game, character));
         break;
       }
       case "rename character": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         const oldName = character.Name;
         character.Name = expr.name;
         await DB.updateCharacterName(character.CharacterId, character.Name);
-        msg.reply(`Renamed ${oldName} to ${character.Name}`);
+        await msg.reply(`Renamed ${oldName} to ${character.Name}`);
         break;
       }
       case "delete character": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         if (character.Name === expr.name) {
           DB.deleteCharacter(character.CharacterId);
         }
-        msg.reply(`${character.Name} has been deleted.`);
+        await msg.reply(`${character.Name} has been deleted.`);
         break;
       }
       case "list server characters":
         {
           const characters = await DB.listCharacters(msg.guild.id);
-          if (!characters.length) return replyNoCharacter();
+          if (!characters.length) return await replyNoCharacter();
           const details = characters.map(
             (character) =>
               `**${character.Name}**
@@ -193,7 +198,7 @@ ${Object.entries(character.Data.Characteristics)
   .join(", ")}
 Skills: ${listSkills(game, character)}`
           );
-          msg.reply(
+          await msg.reply(
             `Here are all the characters on the server:
 
 ${details.join("\n\n")}`
@@ -202,8 +207,8 @@ ${details.join("\n\n")}`
         break;
       case "list characters": {
         const characters = await DB.listCharacters(msg.guild.id, msg.author.id);
-        if (!characters.length) return replyNoCharacter();
-        msg.reply(
+        if (!characters.length) return await replyNoCharacter();
+        await msg.reply(
           `Here are your characters: ${characters
             .map((it) => it.Name)
             .join(", ")}`
@@ -212,7 +217,7 @@ ${details.join("\n\n")}`
       }
       case "skill roll": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         const bonus = expr.bonus - expr.penalty;
         const modifiers =
           bonus > 0
@@ -233,7 +238,7 @@ ${details.join("\n\n")}`
         do {
           ({ message, result, success } = check(value, bonus));
         } while (await checkKarma(character, success));
-        msg.reply(
+        await msg.reply(
           `${character.Name} attempts ${skill} (${value}%${modifiers})!
 ${message}; **${result}!**`
         );
@@ -252,7 +257,7 @@ ${message}; **${result}!**`
             ? `, Penalty: ${-bonus}`
             : "";
         const { error, message, result } = check(value, bonus);
-        msg.reply(
+        await msg.reply(
           error ??
             `${name} attempts ${skill} (${value}%${modifiers})!
 ${message}; **${result}!**`
@@ -266,12 +271,12 @@ ${message}; **${result}!**`
           expr.dice.add,
           expr.dice.multiply
         );
-        msg.reply(`${result.display} = ${result.total}`);
+        await msg.reply(`${result.display} = ${result.total}`);
         break;
       }
       case "hp": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         const maxHP = STATS.HP.max(character);
         const prevHP = character.Data.Stats.HP ?? STATS.HP.default(character);
         const { value: nextHP, display } = modify(
@@ -284,12 +289,12 @@ ${message}; **${result}!**`
           character.Data.Stats.HP = nextHP;
           await DB.updateCharacterData(character.CharacterId, character.Data);
         }
-        msg.reply(`${character.Name}'s HP: ${display}`);
+        await msg.reply(`${character.Name}'s HP: ${display}`);
         break;
       }
       case "sanity": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         const maxSan = STATS.Sanity.max(character);
         const prevSan =
           character.Data.Stats.Sanity ?? STATS.Sanity.default(character);
@@ -303,12 +308,12 @@ ${message}; **${result}!**`
           character.Data.Stats.Sanity = nextSan;
           await DB.updateCharacterData(character.CharacterId, character.Data);
         }
-        msg.reply(`${character.Name}'s Sanity: ${display}`);
+        await msg.reply(`${character.Name}'s Sanity: ${display}`);
         break;
       }
       case "luck": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         const maxLuck = STATS.Luck.max(character);
         const prevLuck =
           character.Data.Stats.Luck ?? STATS.Luck.default(character);
@@ -322,12 +327,12 @@ ${message}; **${result}!**`
           character.Data.Stats.Luck = nextLuck;
           await DB.updateCharacterData(character.CharacterId, character.Data);
         }
-        msg.reply(`${character.Name}'s Luck: ${display}`);
+        await msg.reply(`${character.Name}'s Luck: ${display}`);
         break;
       }
       case "magic": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         const maxMP = STATS.MP.max(character);
         const prevMP = character.Data.Stats.MP ?? STATS.MP.default(character);
         const { value: nextMP, display } = modify(
@@ -340,12 +345,12 @@ ${message}; **${result}!**`
           character.Data.Stats.MP = nextMP;
           await DB.updateCharacterData(character.CharacterId, character.Data);
         }
-        msg.reply(`${character.Name}'s MP: ${display}`);
+        await msg.reply(`${character.Name}'s MP: ${display}`);
         break;
       }
       case "mark": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         const { skill, value, error } = await getSkillClarify(
           msg,
           game,
@@ -357,7 +362,7 @@ ${message}; **${result}!**`
           character.Data.Improvements = [...character.Data.Improvements, skill];
           await DB.updateCharacterData(character.CharacterId, character.Data);
         }
-        msg.reply(
+        await msg.reply(
           error ??
             `${character.Name}'s skill, ${skill} (${value}%) is marked for improvement!`
         );
@@ -365,7 +370,7 @@ ${message}; **${result}!**`
       }
       case "reset mark": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         const { skill, value, error } = await getSkillClarify(
           msg,
           game,
@@ -379,7 +384,7 @@ ${message}; **${result}!**`
           );
           await DB.updateCharacterData(character.CharacterId, character.Data);
         }
-        msg.reply(
+        await msg.reply(
           error ??
             `${character.Name}'s skill, ${skill} (${value}%) is not marked for improvement!`
         );
@@ -387,7 +392,7 @@ ${message}; **${result}!**`
       }
       case "improve": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         let improvements = character.Data.Improvements;
         if (expr.skill) {
           const { skill, error } = await getSkillClarify(
@@ -398,7 +403,7 @@ ${message}; **${result}!**`
             false
           );
           if (error) {
-            msg.reply(error);
+            await msg.reply(error);
             return;
           }
           improvements = [skill];
@@ -429,33 +434,33 @@ ${display}`);
         );
         await DB.updateCharacterData(character.CharacterId, character.Data);
 
-        msg.reply(results.join("\n\n") || `No skills marked for improvement.`);
+        await msg.reply(results.join("\n\n") || `No skills marked for improvement.`);
         break;
       }
       case "stats": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
-        msg.reply(`**${character.Name}** ${listStats(character)}`);
+        if (!character) return await replyNoCharacter();
+        await msg.reply(`**${character.Name}** ${listStats(character)}`);
         break;
       }
       case "set skill": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         const { skill, error } = expr.custom
           ? { skill: expr.skill }
           : await getSkillClarify(msg, game, character, expr.skill);
         if (error) {
-          msg.reply(error);
+          await msg.reply(error);
           break;
         }
         character.Data.Skills[skill] = Math.min(99, Math.max(0, expr.value));
         await DB.updateCharacterData(character.CharacterId, character.Data);
-        msg.reply(listSkills(game, character));
+        await msg.reply(listSkills(game, character));
         break;
       }
       case "reset skill": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
+        if (!character) return await replyNoCharacter();
         const { skill, error } = await getSkillClarify(
           msg,
           game,
@@ -469,13 +474,13 @@ ${display}`);
         }
         delete character.Data.Skills[skill];
         await DB.updateCharacterData(character.CharacterId, character.Data);
-        msg.reply(listSkills(game, character));
+        await msg.reply(listSkills(game, character));
         break;
       }
       case "sheet": {
         const character = await getCurrentCharacter(msg, expr);
-        if (!character) return replyNoCharacter();
-        msg.reply(
+        if (!character) return await replyNoCharacter();
+        await msg.reply(
           `**${character.Name}**
 Stats: ${listStats(character)}
 Skills: ${listSkills(game, character)}`
@@ -484,17 +489,17 @@ Skills: ${listSkills(game, character)}`
       }
       case "help": {
         const helpText = await loadFile(`help/${expr.help}.md`);
-        msg.reply(helpText);
+        await msg.reply(helpText);
         break;
       }
       default:
-        msg.reply(
+        await msg.reply(
           `I'm sorry, I don't understand "${expr.command}". Kyle will probably teach me soon.`
         );
         break;
     }
   } catch (e) {
-    msg.reply(
+    await msg.reply(
       `:head_bandage: I'm really sorry, but something has gone terribly wrong.`
     );
     console.error("Failed to process message", e);
