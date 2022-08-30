@@ -20,6 +20,26 @@ function getServerSettingsMessage(serverSettings) {
           }),
         ],
       }),
+      new Discord.MessageActionRow({
+        components: [
+          new Discord.MessageSelectMenu({
+            customId: `admin:serverSettings:Karma`,
+            placeholder: `Enable karmic rerolls`,
+            options: [
+              {
+                label: `Karma: On`,
+                value: "On",
+                default: serverSettings.Data.Karma === "On",
+              },
+              {
+                label: `Karma: Off`,
+                value: "Off",
+                default: serverSettings.Data.Karma === "Off",
+              },
+            ],
+          }),
+        ],
+      }),
     ],
   };
 }

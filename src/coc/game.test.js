@@ -47,7 +47,7 @@ test("check(50) returns fumble sometimes", () => {
     message: "1d% (100) + 1d10 (0) = 100",
     result: "Fumble",
     roll: 100,
-    success: 0,
+    success: -1,
   });
 });
 
@@ -57,7 +57,7 @@ test("check(25) returns fumble sometimes", () => {
     message: "1d% (90) + 1d10 (9) = 99",
     result: "Fumble",
     roll: 99,
-    success: 0,
+    success: -1,
   });
 });
 

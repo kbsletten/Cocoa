@@ -28,6 +28,23 @@ cocoaClient.on("messageCreate", async (msg) => {
         msg.reply(getServerSettingsMessage(serverSettings));
         break;
       }
+      case "admin channel": {
+        const isAdminChannel =
+          msg.channel.id === serverSettings.Data.AdminChannel;
+        serverSettings.Data.AdminChannel = isAdminChannel
+          ? undefined
+          : msg.channel.id;
+        await DB.updateServerSettings(msg.guild.id, serverSettings.Data);
+        msg.reply(
+          isAdminChannel
+            ? `Admin channel un-set.`
+            : `You will receive admin messages in this channel.`
+        );
+        break;
+      }
+      default: {
+        break;
+      }
     }
   } catch (e) {
     msg.reply(

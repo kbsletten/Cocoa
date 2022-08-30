@@ -77,6 +77,35 @@ cocoaClient.on("messageCreate", async (msg) => {
   }
   const serverSettings = await DB.getServerSettings(msg.guild.id);
   const game = GAMES[serverSettings.Data["Game"] ?? "CORE"];
+  async function checkKarma(character, success) {
+    if (serverSettings.Data.Karma !== "On") {
+      return false;
+    }
+    if (
+      success <= 0 &&
+      Math.random() * 100 < (character.Data.Meta?.Karma ?? 0)
+    ) {
+      if (serverSettings.Data.AdminChannel) {
+        const channel = cocoaClient.channels.cache.get(
+          serverSettings.Data.AdminChannel
+        );
+        if (channel) {
+          channel.send(
+            `${character.Name} got a karmic reroll (Karma: ${character.Data.Meta.Karma})`
+          );
+        }
+      }
+      return true;
+    }
+    if (success > 0) {
+      character.Data.Meta.Karma = 0;
+    } else {
+      character.Data.Meta.Karma += success < 0 ? 15 : 5;
+    }
+    console.log(`${character.Name}'s Karma updated: ${character.Data.Meta.Karma}`);
+    await DB.updateCharacterData(character.CharacterId, character.Data);
+    return false;
+  }
   try {
     console.log(`${msg.content} => ${JSON.stringify(expr)}`);
     switch (expr.command) {
@@ -200,7 +229,10 @@ ${details.join("\n\n")}`
         if (error) {
           return;
         }
-        const { message, result } = check(value, bonus);
+        let message, result, success;
+        do {
+          ({ message, result, success } = check(value, bonus));
+        } while (await checkKarma(character, success));
         msg.reply(
           `${character.Name} attempts ${skill} (${value}%${modifiers})!
 ${message}; **${result}!**`
@@ -297,8 +329,7 @@ ${message}; **${result}!**`
         const character = await getCurrentCharacter(msg, expr);
         if (!character) return replyNoCharacter();
         const maxMP = STATS.MP.max(character);
-        const prevMP =
-          character.Data.Stats.MP ?? STATS.MP.default(character);
+        const prevMP = character.Data.Stats.MP ?? STATS.MP.default(character);
         const { value: nextMP, display } = modify(
           prevMP,
           maxMP,
@@ -387,7 +418,7 @@ ${message}; **${result}!**`
           }
           const { success, message } = check(value);
           let display = "No improvement.";
-          if (!success) {
+          if (success < 1) {
             display = `Improvement: ${improve(game, character, skill).display}`;
           }
           results.push(`**${skill} (${value}%)**: ${message}

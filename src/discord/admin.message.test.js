@@ -3,6 +3,7 @@ const DB = require("../db");
 const MockMessage = require("../mocks/mockMessage");
 
 const eventHandlers = {};
+const dummySettings = { ServerId: "1337", Data: {} };
 jest.mock("../discord/cocoaClient", () => {
   return {
     cocoaClient: {
@@ -15,7 +16,7 @@ jest.mock("../discord/cocoaClient", () => {
 jest.mock("../db", () => {
   return {
     getServerSettings: jest.fn(() => {
-      return { ServerId: "1337", Data: {} };
+      return dummySettings;
     }),
     updateServerSettings: jest.fn(),
     createCharacter: jest.fn(),
@@ -94,6 +95,44 @@ test("'admin sever settings' displays a menu", async () => {
           }),
         ],
       }),
+      new Discord.MessageActionRow({
+        components: [
+          new Discord.MessageSelectMenu({
+            custom_id: "admin:serverSettings:Karma",
+            disabled: false,
+            max_values: undefined,
+            min_values: null,
+            options: [
+              {
+                default: false,
+                description: null,
+                emoji: null,
+                label: "Karma: On",
+                value: "On",
+              },
+              {
+                default: false,
+                description: null,
+                emoji: null,
+                label: "Karma: Off",
+                value: "Off",
+              },
+            ],
+            placeholder: "Enable karmic rerolls",
+          }),
+        ],
+      }),
     ],
   });
+});
+
+test("'admin channel' updates the admin channel", async () => {
+  const message = new MockMessage("admin channel", false, true);
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getServerSettings).toHaveBeenCalled();
+  expect(dummySettings.Data.AdminChannel).toBe(message.channel.id);
+  expect(DB.updateServerSettings).toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `You will receive admin messages in this channel.`
+  );
 });

@@ -108,6 +108,7 @@ function check(value, bonus = 0) {
   let success = 0;
   if (roll === 100 || (value < 50 && roll >= 96)) {
     result = "Fumble";
+    success = -1;
   }
   if (roll <= value) {
     result = "Success";

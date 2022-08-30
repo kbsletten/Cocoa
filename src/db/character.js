@@ -14,6 +14,9 @@ function mapCharacter(character) {
       Improvements: data.Improvements ?? [],
       Skills: data.Skills ?? {},
       Stats: data.Stats ?? {},
+      Meta: data.Meta ?? {
+        Karma: data.Meta?.Karma ?? 0,
+      },
     },
   };
 }
