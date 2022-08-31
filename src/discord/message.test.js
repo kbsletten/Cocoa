@@ -129,6 +129,66 @@ test("'new character' creates a character", async () => {
   ]);
 });
 
+test("'new character John Doe' creates a character", async () => {
+  jest.spyOn(global.Math, "random").mockImplementation(() => 0.9);
+
+  const message = new MockMessage("new character John Doe");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.createCharacter).toHaveBeenCalled();
+  expect(message.reply.mock.lastCall[0].embeds).toEqual([
+    new Discord.MessageEmbed({
+      title: "Rolled stats for John Doe!",
+      fields: [
+        {
+          inline: true,
+          name: "STR",
+          value: "3d6 (6, 6, 6) * 5 = 90",
+        },
+        {
+          inline: true,
+          name: "CON",
+          value: "3d6 (6, 6, 6) * 5 = 90",
+        },
+        {
+          inline: true,
+          name: "SIZ",
+          value: "(2d6 (6, 6) + 6) * 5 = 90",
+        },
+        {
+          inline: true,
+          name: "DEX",
+          value: "3d6 (6, 6, 6) * 5 = 90",
+        },
+        {
+          inline: true,
+          name: "APP",
+          value: "3d6 (6, 6, 6) * 5 = 90",
+        },
+        {
+          inline: true,
+          name: "INT",
+          value: "(2d6 (6, 6) + 6) * 5 = 90",
+        },
+        {
+          inline: true,
+          name: "POW",
+          value: "3d6 (6, 6, 6) * 5 = 90",
+        },
+        {
+          inline: true,
+          name: "EDU",
+          value: "(2d6 (6, 6) + 6) * 5 = 90",
+        },
+        {
+          inline: true,
+          name: "Luck",
+          value: "3d6 (6, 6, 6) * 5 = 90",
+        },
+      ],
+    }),
+  ]);
+});
+
 test("'edit character' creates an interactive modal", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
 
@@ -529,6 +589,7 @@ test("'rename character New Name' renames the character", async () => {
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(dummyCharacter.Name).toBe("New Name");
   expect(DB.updateCharacterName).toHaveBeenCalled();
+  expect(DB.updateCharacterData).not.toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalled();
 });
 

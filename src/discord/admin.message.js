@@ -21,7 +21,6 @@ cocoaClient.on("messageCreate", async (msg) => {
     return;
   }
   try {
-    console.log(`${msg.content} => ${JSON.stringify(expr)}`);
     const serverSettings = await DB.getServerSettings(msg.guild.id);
     switch (expr.adminCommand) {
       case "server settings": {

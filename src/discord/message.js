@@ -14,9 +14,15 @@ const {
   modify,
 } = require("../coc/game");
 const { GAMES, STATS } = require("../coc/data");
-const { getEditMessage } = require("./getEditMessage");
 const { choice } = require("./choice");
 const { loadFile } = require("../file");
+const NewCharacterCommand = require("./commands/newCharacter");
+const EditCharacterCommand = require("./commands/editCharacter");
+const RenameCharacterCommand = require("./commands/renameCharacter");
+const DeleteCharacterCommand = require("./commands/deleteCharacter");
+const ListServerCharactersCommand = require("./commands/listServerCharacters");
+const ListCharactersCommand = require("./commands/listCharacters");
+const SkillRollCommand = require("./commands/skillRoll");
 
 async function getAuthorDisplayName(msg) {
   const member = await msg.guild.members.fetch(msg.author);
@@ -28,7 +34,9 @@ async function getCurrentCharacter(msg, expr) {
   if (character) {
     return character;
   }
-  await msg.reply(`Whoops! You don't have any characters yet. Try "new character".`);
+  await msg.reply(
+    `Whoops! You don't have any characters yet. Try "new character".`
+  );
   return null;
 }
 
@@ -83,9 +91,7 @@ cocoaClient.on("messageCreate", async (msg) => {
         serverSettings.Data.AdminChannel
       );
       if (channel) {
-        await channel.send(
-          ...msg
-        );
+        await channel.send(...msg);
       }
     }
   }
@@ -97,7 +103,9 @@ cocoaClient.on("messageCreate", async (msg) => {
       success <= 0 &&
       Math.random() * 100 < (character.Data.Meta?.Karma ?? 0)
     ) {
-      await notifyAdmin(`${character.Name} got a karmic reroll (Karma: ${character.Data.Meta.Karma})`)
+      await notifyAdmin(
+        `${character.Name} got a karmic reroll (Karma: ${character.Data.Meta.Karma})`
+      );
       return true;
     }
     if (success > 0) {
@@ -112,138 +120,21 @@ cocoaClient.on("messageCreate", async (msg) => {
     return false;
   }
   try {
-    console.log(`${msg.content} => ${JSON.stringify(expr)}`);
+    const commands = {
+      "new character": NewCharacterCommand,
+      "edit character": EditCharacterCommand,
+      "rename character": RenameCharacterCommand,
+      "delete character": DeleteCharacterCommand,
+      "list server characters": ListServerCharactersCommand,
+      "list characters": ListCharactersCommand,
+      "skill roll": SkillRollCommand,
+    }
+    const Command = commands[expr.command]
+    if (Command) {
+      await new Command(msg, expr, DB).process();
+      return;
+    }
     switch (expr.command) {
-      case "new character":
-        const characteristics = {
-          STR: d6(3, { multiply: 5 }),
-          CON: d6(3, { multiply: 5 }),
-          SIZ: d6(2, { add: 6, multiply: 5 }),
-          DEX: d6(3, { multiply: 5 }),
-          APP: d6(3, { multiply: 5 }),
-          INT: d6(2, { add: 6, multiply: 5 }),
-          POW: d6(3, { multiply: 5 }),
-          EDU: d6(2, { add: 6, multiply: 5 }),
-        };
-        const Luck = d6(3, { multiply: 5 });
-        const character = {
-          Name: expr.name ?? "New Character",
-          Data: {
-            Characteristics: {},
-            Skills: {},
-            Stats: { Luck: Luck.total },
-          },
-        };
-        for (const [char, { total }] of Object.entries(characteristics)) {
-          character.Data.Characteristics[char] = total;
-        }
-        const id = await DB.createCharacter(
-          msg.guild.id,
-          msg.author.id,
-          character.Name,
-          JSON.stringify(character.Data)
-        );
-        await msg.reply({
-          content: `Created a new character named ${expr.name}!`,
-          embeds: [
-            new Discord.MessageEmbed({
-              title: `Rolled stats for ${character.Name}!`,
-              fields: Object.entries({ ...characteristics, Luck }).map(
-                ([key, value]) => {
-                  return {
-                    name: key,
-                    value: `${value.display} = ${value.total}`,
-                    inline: true,
-                  };
-                }
-              ),
-            }),
-          ],
-        });
-        break;
-      case "edit character": {
-        const character = await getCurrentCharacter(msg, expr);
-        if (!character) return await replyNoCharacter();
-        await msg.reply(getEditMessage(game, character));
-        break;
-      }
-      case "rename character": {
-        const character = await getCurrentCharacter(msg, expr);
-        if (!character) return await replyNoCharacter();
-        const oldName = character.Name;
-        character.Name = expr.name;
-        await DB.updateCharacterName(character.CharacterId, character.Name);
-        await msg.reply(`Renamed ${oldName} to ${character.Name}`);
-        break;
-      }
-      case "delete character": {
-        const character = await getCurrentCharacter(msg, expr);
-        if (!character) return await replyNoCharacter();
-        if (character.Name === expr.name) {
-          DB.deleteCharacter(character.CharacterId);
-        }
-        await msg.reply(`${character.Name} has been deleted.`);
-        break;
-      }
-      case "list server characters":
-        {
-          const characters = await DB.listCharacters(msg.guild.id);
-          if (!characters.length) return await replyNoCharacter();
-          const details = characters.map(
-            (character) =>
-              `**${character.Name}**
-${listStats(character)}
-${Object.entries(character.Data.Characteristics)
-  .map(([char, value]) => `${char}: ${value}`)
-  .join(", ")}
-Skills: ${listSkills(game, character)}`
-          );
-          await msg.reply(
-            `Here are all the characters on the server:
-
-${details.join("\n\n")}`
-          );
-        }
-        break;
-      case "list characters": {
-        const characters = await DB.listCharacters(msg.guild.id, msg.author.id);
-        if (!characters.length) return await replyNoCharacter();
-        await msg.reply(
-          `Here are your characters: ${characters
-            .map((it) => it.Name)
-            .join(", ")}`
-        );
-        break;
-      }
-      case "skill roll": {
-        const character = await getCurrentCharacter(msg, expr);
-        if (!character) return await replyNoCharacter();
-        const bonus = expr.bonus - expr.penalty;
-        const modifiers =
-          bonus > 0
-            ? `, Bonus: ${bonus}`
-            : bonus < 0
-            ? `, Penalty: ${-bonus}`
-            : "";
-        const { error, value, skill } = await getSkillClarify(
-          msg,
-          game,
-          character,
-          expr.skill
-        );
-        if (error) {
-          return;
-        }
-        let message, result, success;
-        do {
-          ({ message, result, success } = check(value, bonus));
-        } while (await checkKarma(character, success));
-        await msg.reply(
-          `${character.Name} attempts ${skill} (${value}%${modifiers})!
-${message}; **${result}!**`
-        );
-        break;
-      }
       case "check": {
         const character = await DB.getCharacter(msg.guild.id, msg.author.id);
         const name = character?.Name ?? (await getAuthorDisplayName(msg));
@@ -434,7 +325,9 @@ ${display}`);
         );
         await DB.updateCharacterData(character.CharacterId, character.Data);
 
-        await msg.reply(results.join("\n\n") || `No skills marked for improvement.`);
+        await msg.reply(
+          results.join("\n\n") || `No skills marked for improvement.`
+        );
         break;
       }
       case "stats": {

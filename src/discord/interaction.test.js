@@ -30,7 +30,6 @@ jest.mock("../db", () => {
     updateCharacterData: jest.fn(),
   };
 });
-jest;
 
 require("./cocoaClient");
 require("./interaction");
