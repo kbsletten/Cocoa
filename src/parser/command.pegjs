@@ -9,17 +9,17 @@ Command
     /   EDIT WS CHARACTER { return { 'command': 'edit character' }; }
     /   HELP WS h:Help { return { 'command': 'help', 'help': h }; }
     /   HELP { return { 'command': 'help', 'help': 'help' }; }
-    /   HP WS n:MOD { return { 'command': 'hp', 'add': n }; }
-    /   HP WS n:NUMBER { return { 'command': 'hp', 'set': n }; }
+    /   HP WS n:MOD { return { 'command': 'stat', 'stat': 'HP', 'add': n }; }
+    /   HP WS n:NUMBER { return { 'command': 'stat', 'stat': 'HP', 'set': n }; }
     /   IMPROVE WS MARKED { return { 'command': 'improve' }; }
     /   IMPROVE WS s:WORDS { return { 'command': 'improve', 'skill': s }; }
     /   LIST WS CHARACTERS { return { 'command': 'list characters' }; }
     /   LIST WS SERVER WS CHARACTERS { return { 'command': 'list server characters' }; }
-    /   LUCK WS n:MOD { return { 'command': 'luck', 'add': n }; }
-    /   LUCK WS n:NUMBER { return { 'command': 'luck', 'set': n }; }
+    /   LUCK WS n:MOD { return { 'command': 'stat', 'stat': 'Luck', 'add': n }; }
+    /   LUCK WS n:NUMBER { return { 'command': 'stat', 'stat': 'Luck', 'set': n }; }
     /   MARK WS s:WORDS { return { 'command': 'mark', 'skill': s }; }
-    /   MAGIC WS n:MOD { return { 'command': 'magic', 'add': n }; }
-    /   MAGIC WS n:NUMBER { return { 'command': 'magic', 'set': n }; }
+    /   MAGIC WS n:MOD { return { 'command': 'stat', 'stat': 'MP', 'add': n }; }
+    /   MAGIC WS n:NUMBER { return { 'command': 'stat', 'stat': 'MP', 'set': n }; }
     /   NEW WS CHARACTER WS n:NAME { return { 'command': 'new character', 'name': n }; }
     /   NEW WS CHARACTER { return { 'command': 'new character' }; }
     /   RENAME WS CHARACTER WS n:NAME { return { 'command': 'rename character', 'name': n }; }
@@ -30,12 +30,13 @@ Command
     /   ROLL WS (SKILL WS)? s:Skill { return { 'command': 'skill roll', ...s }; }
     /   ROLL WS (CHECK WS)? n:NUMBER WS s:Skill { return { 'command': 'check', 'value': n, ...s }; }
     /   ROLL WS (CHECK WS)? n:NUMBER { return { 'command': 'check', 'value': n, 'bonus': 0, 'penalty': 0 }; }
-    /   SANITY WS n:MOD { return { 'command': 'sanity', 'add': n }; }
-    /   SANITY WS n:NUMBER { return { 'command': 'sanity', 'set': n }; }
+    /   SANITY WS n:MOD { return { 'command': 'stat', 'stat': 'Sanity', 'add': n }; }
+    /   SANITY WS n:NUMBER { return { 'command': 'stat', 'stat': 'Sanity', 'set': n }; }
     /   SET WS CUSTOM WS SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n, 'custom': true }; }
-    /   SET WS HP WS n:NUMBER { return { 'command': 'hp', 'set': n }; }
-    /   SET WS LUCK WS n:NUMBER { return { 'command': 'luck', 'set': n }; }
-    /   SET WS SANITY WS n:NUMBER { return { 'command': 'sanity', 'set': n }; }
+    /   SET WS HP WS n:NUMBER { return { 'command': 'stat', 'stat': 'HP', 'set': n }; }
+    /   SET WS MAGIC WS n:NUMBER { return { 'command': 'stat', 'stat': 'MP', 'set': n }; }
+    /   SET WS LUCK WS n:NUMBER { return { 'command': 'stat', 'stat': 'Luck', 'set': n }; }
+    /   SET WS SANITY WS n:NUMBER { return { 'command': 'stat', 'stat': 'Sanity', 'set': n }; }
     /   SET WS SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n }; }
     /   SHEET { return { 'command': 'sheet' }; }
     /   SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n }; }

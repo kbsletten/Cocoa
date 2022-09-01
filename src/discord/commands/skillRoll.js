@@ -6,7 +6,7 @@ class SkillRollCommand extends CharacterCommand {
     const bonus = this.expr.bonus - this.expr.penalty;
     const modifiers =
       bonus > 0 ? `, Bonus: ${bonus}` : bonus < 0 ? `, Penalty: ${-bonus}` : "";
-    const { error, value, skill } = await this.getSkillClarify(this.expr.skill);
+    const { error, value, skill } = await this.getSkillClarify();
     if (error) {
       return error;
     }

@@ -302,6 +302,36 @@ test("'check 70 Listen' fails on 71", async () => {
 1d% (70) + 1d10 (1) = 71; **Failure!**`);
 });
 
+test("'check 70 Unknown Skill' fails on 71", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => null);
+  jest
+    .spyOn(global.Math, "random")
+    .mockImplementationOnce(() => 0.1)
+    .mockImplementationOnce(() => 0.7);
+
+  const message = new MockMessage("check 70 Unknown Skill");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(message.reply)
+    .toHaveBeenCalledWith(`Test Nickname attempts Unknown Skill (70%)!
+1d% (70) + 1d10 (1) = 71; **Failure!**`);
+});
+
+test("'check 70' fails on 71", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => null);
+  jest
+    .spyOn(global.Math, "random")
+    .mockImplementationOnce(() => 0.1)
+    .mockImplementationOnce(() => 0.7);
+
+  const message = new MockMessage("check 70");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(message.reply)
+    .toHaveBeenCalledWith(`Test Nickname attempts an Unknown Skill (70%)!
+1d% (70) + 1d10 (1) = 71; **Failure!**`);
+});
+
 test("'skill Listen' succeeds on 69", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
   jest
@@ -465,6 +495,31 @@ test("'mark Listen' marks the Listen skill for improvement", async () => {
   );
 });
 
+test("'mark Listen' is idempotent", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+
+  const message = new MockMessage("mark Listen");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(dummyCharacter.Data.Improvements).toContain("Listen");
+  expect(DB.updateCharacterData).not.toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `Dummy Character's skill, Listen (70%) is marked for improvement!`
+  );
+});
+
+test("'mark Not a Skill' returns an error", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+
+  const message = new MockMessage("mark Not a Skill");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(DB.updateCharacterData).not.toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `I'm sorry, I haven't heard of "Not a Skill".`
+  );
+});
+
 test("'reset mark Listen' removes the mark from the Listen skill", async () => {
   expect(dummyCharacter.Data.Improvements).toContain("Listen");
 
@@ -480,6 +535,36 @@ test("'reset mark Listen' removes the mark from the Listen skill", async () => {
   );
 });
 
+test("'reset mark Listen' is idempotent", async () => {
+  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+
+  const message = new MockMessage("reset mark Listen");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+  expect(DB.updateCharacterData).not.toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `Dummy Character's skill, Listen (70%) is not marked for improvement!`
+  );
+});
+
+test("'reset mark Not a Skill' returns an error", async () => {
+  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+
+  const message = new MockMessage("reset mark Not a Skill");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+  expect(DB.updateCharacterData).not.toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `I'm sorry, I haven't heard of "Not a Skill".`
+  );
+});
+
 test("'improve Listen' doesn't improve Listen skill on 70", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
   jest
@@ -492,7 +577,7 @@ test("'improve Listen' doesn't improve Listen skill on 70", async () => {
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(dummyCharacter.Data.Skills.Listen).toBe(70);
   expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
-  expect(DB.updateCharacterData).toHaveBeenCalled();
+  expect(DB.updateCharacterData).not.toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
     `**Listen (70%)**: 1d% (70) + 1d10 (0) = 70
 No improvement.`

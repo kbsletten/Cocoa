@@ -32,11 +32,11 @@ class CharacterCommand extends Command {
     throw new Error("Not implemented.");
   }
 
-  async getSkillClarify(skillName, ...params) {
+  async getSkillClarify(...params) {
     const { error, skillOptions, ...results } = findSkill(
       this.game,
       this.character,
-      skillName,
+      this.expr.skill,
       ...params
     );
     return await new Promise(async (resolve) => {
