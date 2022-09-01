@@ -128,8 +128,8 @@ cocoaClient.on("messageCreate", async (msg) => {
       "list server characters": ListServerCharactersCommand,
       "list characters": ListCharactersCommand,
       "skill roll": SkillRollCommand,
-    }
-    const Command = commands[expr.command]
+    };
+    const Command = commands[expr.command];
     if (Command) {
       await new Command(msg, expr, DB).process();
       return;

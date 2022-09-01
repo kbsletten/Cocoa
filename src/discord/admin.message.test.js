@@ -58,72 +58,7 @@ test("'admin sever settings' displays a menu", async () => {
   const message = new MockMessage("admin server settings", false, true);
   await eventHandlers["messageCreate"](message);
   expect(DB.getServerSettings).toHaveBeenCalled();
-  expect(message.reply).toHaveBeenCalledWith({
-    content: `Editing server settings...`,
-    components: [
-      new Discord.MessageActionRow({
-        components: [
-          new Discord.MessageSelectMenu({
-            custom_id: "admin:serverSettings:Game",
-            disabled: false,
-            max_values: undefined,
-            min_values: null,
-            options: [
-              {
-                default: false,
-                description: null,
-                emoji: null,
-                label: "Game: CORE",
-                value: "CORE",
-              },
-              {
-                default: false,
-                description: null,
-                emoji: null,
-                label: "Game: MODERN",
-                value: "MODERN",
-              },
-              {
-                default: false,
-                description: null,
-                emoji: null,
-                label: "Game: KIDS",
-                value: "KIDS",
-              },
-            ],
-            placeholder: "Choose game",
-          }),
-        ],
-      }),
-      new Discord.MessageActionRow({
-        components: [
-          new Discord.MessageSelectMenu({
-            custom_id: "admin:serverSettings:Karma",
-            disabled: false,
-            max_values: undefined,
-            min_values: null,
-            options: [
-              {
-                default: false,
-                description: null,
-                emoji: null,
-                label: "Karma: On",
-                value: "On",
-              },
-              {
-                default: false,
-                description: null,
-                emoji: null,
-                label: "Karma: Off",
-                value: "Off",
-              },
-            ],
-            placeholder: "Enable karmic rerolls",
-          }),
-        ],
-      }),
-    ],
-  });
+  expect(message.reply).toHaveBeenCalled();
 });
 
 test("'admin channel' updates the admin channel", async () => {

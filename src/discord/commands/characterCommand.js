@@ -12,7 +12,7 @@ class CharacterCommand extends Command {
     if (!this.character) {
       return `Whoops! You don't have any characters yet. Try "new character".`;
     }
-    const reply = this.processCharacterCommand();
+    const reply = await this.processCharacterCommand();
     if (this.shouldUpdateCharacterData()) {
       await this.DB.updateCharacterData(
         this.character.CharacterId,
@@ -23,10 +23,9 @@ class CharacterCommand extends Command {
   }
 
   shouldUpdateCharacterData() {
-    return (
-      JSON.stringify(this.character.Data) !==
-      JSON.stringify(this.originalCharacter.Data)
-    );
+    const characterData = JSON.stringify(this.character.Data);
+    const originalData = JSON.stringify(this.originalCharacter.Data);
+    return characterData !== originalData;
   }
 
   async processCharacterCommand() {
@@ -74,9 +73,10 @@ class CharacterCommand extends Command {
     if (success > 0) {
       this.character.Data.Meta.Karma = 0;
     } else {
-      this.character.Data.Meta.Karma += success < 0 ? 15 : 5;
+      this.character.Data.Meta.Karma =
+        (this.character.Data.Meta.Karma ?? 0) + (success < 0 ? 15 : 5);
     }
-    await notifyAdmin(
+    await this.notifyAdmin(
       `${this.character.Name}'s Karma updated: ${this.character.Data.Meta.Karma}`
     );
     return false;

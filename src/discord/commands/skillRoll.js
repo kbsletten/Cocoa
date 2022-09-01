@@ -14,8 +14,23 @@ class SkillRollCommand extends CharacterCommand {
     do {
       ({ message, result, success } = check(value, bonus));
     } while (await this.checkKarma(success));
+    let mark = "";
+    if (
+      success > 0 &&
+      (this.serverSettings.Data.Mark === "Always" ||
+        (this.serverSettings.Data.Mark === "Auto" && bonus === 0))
+    ) {
+      if (!this.character.Data.Improvements.includes(skill)) {
+        this.character.Data.Improvements = [
+          ...this.character.Data.Improvements,
+          skill,
+        ];
+      }
+      mark = `
+Marked for improvement!`;
+    }
     return `${this.character.Name} attempts ${skill} (${value}%${modifiers})!
-${message}; **${result}!**`;
+${message}; **${result}!**${mark}`;
   }
 }
 

@@ -40,6 +40,31 @@ function getServerSettingsMessage(serverSettings) {
           }),
         ],
       }),
+      new Discord.MessageActionRow({
+        components: [
+          new Discord.MessageSelectMenu({
+            customId: `admin:serverSettings:Mark`,
+            placeholder: `Enable automatic marking of skills`,
+            options: [
+              {
+                label: `Mark: Manual`,
+                value: "Manual",
+                default: serverSettings.Data.Mark === "Manual"
+              },
+              {
+                label: `Mark: Auto`,
+                value: "Auto",
+                default: serverSettings.Data.Mark === "Auto"
+              },
+              {
+                label: `Mark: Always`,
+                value: "Always",
+                default: serverSettings.Data.Mark === "Always"
+              },
+            ]
+          })
+        ]
+      })
     ],
   };
 }
