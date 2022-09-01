@@ -396,5 +396,12 @@ Skills: ${listSkills(game, character)}`
       `:head_bandage: I'm really sorry, but something has gone terribly wrong.`
     );
     console.error("Failed to process message", e);
+    const owner = await cocoaClient.users.fetch(process.env.OWNER_ID);
+    if (owner) {
+      const dmChannel = owner.dmChannel ?? await owner.createDM();
+      await dmChannel.send(`Error in ${msg.guild.id} for ${msg.author.id}:
+${e}
+${e.stack}`);
+    }
   }
 });
