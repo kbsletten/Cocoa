@@ -661,6 +661,7 @@ test("'sheet' displays your character sheet", async () => {
   expect(message.reply).toHaveBeenCalledWith(
     `**Dummy Character**
 Stats: HP: 10/10, Luck: 10/99, MP: 5/10, Sanity: 10/99
+Move: 8, Build: 0, Damage Bonus: None
 Skills: Not set`
   );
 });

@@ -59,7 +59,9 @@ function getSkill(
   includeDefaults = true
 ) {
   const skills = {
-    ...(includeDefaults ? getDefaults(game, character, includeCharacteristics) : {}),
+    ...(includeDefaults
+      ? getDefaults(game, character, includeCharacteristics)
+      : {}),
     ...character.Data.Skills,
   };
   const value = skills[skill];
@@ -74,7 +76,9 @@ function findSkill(
   includeDefaults = true
 ) {
   const skills = {
-    ...(includeDefaults ? getDefaults(game, character, includeCharacteristics) : {}),
+    ...(includeDefaults
+      ? getDefaults(game, character, includeCharacteristics)
+      : {}),
     ...character.Data.Skills,
   };
   const { matching: skillOptions, match: skill } = fuzzySearch(
@@ -188,7 +192,7 @@ function listSkills(game, character) {
     ...character.Data.Skills,
   };
   const skillNames = [
-    ...character.Data.Improvements.filter(it => skills[it]),
+    ...character.Data.Improvements.filter((it) => skills[it]),
     ...Object.keys(character.Data.Skills),
   ]
     .sort()
@@ -204,6 +208,53 @@ function listSkills(game, character) {
         .join(", ");
 }
 
+function move(character) {
+  const str = character.Data.Characteristics.STR ?? 0;
+  const dex = character.Data.Characteristics.DEX ?? 0;
+  const siz = character.Data.Characteristics.SIZ ?? 0;
+  if (str < siz && dex < siz) {
+    return 7;
+  } else if (str > siz && dex > siz) {
+    return 9;
+  } else {
+    return 8;
+  }
+}
+
+function build(character) {
+  const bulk =
+    (character.Data.Characteristics.STR ?? 0) +
+    (character.Data.Characteristics.SIZ ?? 0);
+  if (bulk < 65) {
+    return -2;
+  } else if (bulk < 85) {
+    return -1;
+  } else if (bulk < 125) {
+    return 0;
+  } else if (bulk < 165) {
+    return 1;
+  } else {
+    return 2;
+  }
+}
+
+function damageBonus(character) {
+  const bulk =
+    (character.Data.Characteristics.STR ?? 0) +
+    (character.Data.Characteristics.SIZ ?? 0);
+  if (bulk < 65) {
+    return "-2";
+  } else if (bulk < 85) {
+    return "-1";
+  } else if (bulk < 125) {
+    return "None";
+  } else if (bulk < 165) {
+    return "+1D4";
+  } else {
+    return "+1D6";
+  }
+}
+
 module.exports = {
   check,
   d10,
@@ -216,4 +267,7 @@ module.exports = {
   listSkills,
   listStats,
   modify,
+  move,
+  build,
+  damageBonus,
 };
