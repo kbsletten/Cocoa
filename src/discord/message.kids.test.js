@@ -16,7 +16,7 @@ jest.mock("../discord/cocoaClient", () => {
 jest.mock("../db", () => {
   return {
     getServerSettings: jest.fn(() => {
-      return { ServerId: "1337", Data: { Game: "KIDS" } };
+      return { ServerId: "1337", Data: { Game: "KIDS", Mark: "Auto" } };
     }),
     updateServerSettings: jest.fn(),
     createCharacter: jest.fn(),
@@ -65,5 +65,6 @@ test("'skill Gym Class' succeeds on 19", async () => {
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(message.reply)
     .toHaveBeenCalledWith(`Dummy Character attempts Gym Class (20%)!
-1d% (10) + 1d10 (9) = 19; **Success!**`);
+1d% (10) + 1d10 (9) = 19; **Success!**
+Marked for improvement!`);
 });

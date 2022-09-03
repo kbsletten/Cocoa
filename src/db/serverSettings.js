@@ -1,7 +1,8 @@
 const DB = require("./util");
 
-function mapServerSettings(data) {
-  return { ...data, Data: JSON.parse(data.Data) };
+function mapServerSettings(serverSettings) {
+  const data = JSON.parse(serverSettings.Data);
+  return { ...serverSettings, Data: { ...data, Mark: data.Mark ?? "Auto" } };
 }
 
 async function getServerSettings(serverId) {

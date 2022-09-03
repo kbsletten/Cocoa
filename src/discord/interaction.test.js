@@ -16,10 +16,7 @@ jest.mock("../discord/cocoaClient", () => {
 jest.mock("../db", () => {
   return {
     getServerSettings: jest.fn(() => {
-      return {
-        ServerId: "1337",
-        Data: {},
-      };
+      return { ServerId: "1337", Data: { Mark: "Auto" } };
     }),
     updateServerSettings: jest.fn(),
     createCharacter: jest.fn(),

@@ -17,7 +17,7 @@ jest.mock("../discord/cocoaClient", () => {
 jest.mock("../db", () => {
   return {
     getServerSettings: jest.fn(() => {
-      return { ServerId: "1337", Data: {} };
+      return { ServerId: "1337", Data: { Mark: "Auto" } };
     }),
     updateServerSettings: jest.fn(),
     createCharacter: jest.fn(),
@@ -342,9 +342,12 @@ test("'skill Listen' succeeds on 69", async () => {
   const message = new MockMessage("skill Listen");
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
+  expect(dummyCharacter.Data.Improvements).toContain("Listen");
+  expect(DB.updateCharacterData).toHaveBeenCalled();
   expect(message.reply)
     .toHaveBeenCalledWith(`Dummy Character attempts Listen (70%)!
-1d% (60) + 1d10 (9) = 69; **Success!**`);
+1d% (60) + 1d10 (9) = 69; **Success!**
+Marked for improvement!`);
 });
 
 test("'skill Listen bonus' succeeds on 70", async () => {
@@ -482,29 +485,29 @@ test("'magic 5' sets the magic points to 5", async () => {
   expect(message.reply).toHaveBeenCalledWith(`Dummy Character's MP: 5/10 (-5)`);
 });
 
-test("'mark Listen' marks the Listen skill for improvement", async () => {
+test("'mark Spot Hidden' marks the Spot Hidden skill for improvement", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
 
-  const message = new MockMessage("mark Listen");
+  const message = new MockMessage("mark Spot Hidden");
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
-  expect(dummyCharacter.Data.Improvements).toContain("Listen");
+  expect(dummyCharacter.Data.Improvements).toContain("Spot Hidden");
   expect(DB.updateCharacterData).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `Dummy Character's skill, Listen (70%) is marked for improvement!`
+    `Dummy Character's skill, Spot Hidden (25%) is marked for improvement!`
   );
 });
 
-test("'mark Listen' is idempotent", async () => {
+test("'mark Spot Hidden' is idempotent", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
 
-  const message = new MockMessage("mark Listen");
+  const message = new MockMessage("mark Spot Hidden");
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
-  expect(dummyCharacter.Data.Improvements).toContain("Listen");
+  expect(dummyCharacter.Data.Improvements).toContain("Spot Hidden");
   expect(DB.updateCharacterData).not.toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `Dummy Character's skill, Listen (70%) is marked for improvement!`
+    `Dummy Character's skill, Spot Hidden (25%) is marked for improvement!`
   );
 });
 
@@ -520,96 +523,96 @@ test("'mark Not a Skill' returns an error", async () => {
   );
 });
 
-test("'reset mark Listen' removes the mark from the Listen skill", async () => {
-  expect(dummyCharacter.Data.Improvements).toContain("Listen");
+test("'reset mark Spot Hidden' removes the mark from the Spot Hidden skill", async () => {
+  expect(dummyCharacter.Data.Improvements).toContain("Spot Hidden");
 
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
 
-  const message = new MockMessage("reset mark Listen");
+  const message = new MockMessage("reset mark Spot Hidden");
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
-  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+  expect(dummyCharacter.Data.Improvements).not.toContain("Spot Hidden");
   expect(DB.updateCharacterData).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `Dummy Character's skill, Listen (70%) is not marked for improvement!`
+    `Dummy Character's skill, Spot Hidden (25%) is not marked for improvement!`
   );
 });
 
-test("'reset mark Listen' is idempotent", async () => {
-  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+test("'reset mark Spot Hidden' is idempotent", async () => {
+  expect(dummyCharacter.Data.Improvements).not.toContain("Spot Hidden");
 
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
 
-  const message = new MockMessage("reset mark Listen");
+  const message = new MockMessage("reset mark Spot Hidden");
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
-  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+  expect(dummyCharacter.Data.Improvements).not.toContain("Spot Hidden");
   expect(DB.updateCharacterData).not.toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `Dummy Character's skill, Listen (70%) is not marked for improvement!`
+    `Dummy Character's skill, Spot Hidden (25%) is not marked for improvement!`
   );
 });
 
 test("'reset mark Not a Skill' returns an error", async () => {
-  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+  expect(dummyCharacter.Data.Improvements).not.toContain("Spot Hidden");
 
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
 
   const message = new MockMessage("reset mark Not a Skill");
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
-  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+  expect(dummyCharacter.Data.Improvements).not.toContain("Spot Hidden");
   expect(DB.updateCharacterData).not.toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
     `I'm sorry, I haven't heard of "Not a Skill".`
   );
 });
 
-test("'improve Listen' doesn't improve Listen skill on 70", async () => {
+test("'improve Spot Hidden' doesn't improve Spot Hidden skill on 25", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
   jest
     .spyOn(global.Math, "random")
-    .mockImplementationOnce(() => 0.0)
-    .mockImplementationOnce(() => 0.6);
+    .mockImplementationOnce(() => 0.5)
+    .mockImplementationOnce(() => 0.2);
 
-  const message = new MockMessage("improve Listen");
+  const message = new MockMessage("improve Spot Hidden");
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
-  expect(dummyCharacter.Data.Skills.Listen).toBe(70);
-  expect(dummyCharacter.Data.Improvements).not.toContain("Listen");
+  expect(dummyCharacter.Data.Skills["Spot Hidden"]).toBe(undefined);
+  expect(dummyCharacter.Data.Improvements).not.toContain("Spot Hidden");
   expect(DB.updateCharacterData).not.toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `**Listen (70%)**: 1d% (70) + 1d10 (0) = 70
+    `**Spot Hidden (25%)**: 1d% (20) + 1d10 (5) = 25
 No improvement.`
   );
 });
 
-test("'improve Listen' improves the Listen skill on 71", async () => {
+test("'improve Spot Hidden' improves the Spot Hidden skill on 26", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
   jest
     .spyOn(global.Math, "random")
-    .mockImplementationOnce(() => 0.1)
-    .mockImplementationOnce(() => 0.7)
+    .mockImplementationOnce(() => 0.6)
+    .mockImplementationOnce(() => 0.2)
     .mockImplementationOnce(() => 0.3);
 
-  const message = new MockMessage("improve Listen");
+  const message = new MockMessage("improve Spot Hidden");
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
-  expect(dummyCharacter.Data.Skills.Listen).toBe(74);
+  expect(dummyCharacter.Data.Skills["Spot Hidden"]).toBe(29);
   expect(DB.updateCharacterData).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `**Listen (70%)**: 1d% (70) + 1d10 (1) = 71
-Improvement: 70 + 1d10 (4) = 74`
+    `**Spot Hidden (25%)**: 1d% (20) + 1d10 (6) = 26
+Improvement: 25 + 1d10 (4) = 29`
   );
 });
 
 test("'improve marked' improves multiple skills", async () => {
-  dummyCharacter.Data.Improvements = ["Listen", "Climb"];
+  dummyCharacter.Data.Improvements = ["Spot Hidden", "Climb"];
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
   jest
     .spyOn(global.Math, "random")
-    .mockImplementationOnce(() => 0.1)
-    .mockImplementationOnce(() => 0.7)
+    .mockImplementationOnce(() => 0.9)
+    .mockImplementationOnce(() => 0.2)
     .mockImplementationOnce(() => 0.5)
     .mockImplementationOnce(() => 0.5)
     .mockImplementationOnce(() => 0.3);
@@ -618,11 +621,11 @@ test("'improve marked' improves multiple skills", async () => {
     const message = new MockMessage("improve marked");
     await eventHandlers["messageCreate"](message);
     expect(DB.getCharacter).toHaveBeenCalled();
-    expect(dummyCharacter.Data.Skills.Listen).toBe(74);
+    expect(dummyCharacter.Data.Skills["Spot Hidden"]).toBe(29);
     expect(dummyCharacter.Data.Skills.Climb).toBe(24);
     expect(DB.updateCharacterData).toHaveBeenCalled();
     expect(message.reply).toHaveBeenCalledWith(
-      `**Listen (74%)**: 1d% (70) + 1d10 (1) = 71
+      `**Spot Hidden (29%)**: 1d% (20) + 1d10 (9) = 29
 No improvement.
 
 **Climb (20%)**: 1d% (50) + 1d10 (5) = 55
@@ -650,7 +653,7 @@ test("'reset skill Listen' resets your Listen skill to the default value", async
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(dummyCharacter.Data.Skills.Listen).toBe(undefined);
   expect(DB.updateCharacterData).toHaveBeenCalled();
-  expect(message.reply).toHaveBeenCalledWith(`Not set`);
+  expect(message.reply).toHaveBeenCalledWith(`Spot Hidden (29%)`);
 });
 
 test("'sheet' displays your character sheet", async () => {
@@ -662,7 +665,7 @@ test("'sheet' displays your character sheet", async () => {
     `**Dummy Character**
 Stats: HP: 10/10, Luck: 10/99, MP: 5/10, Sanity: 10/99
 Move: 8, Build: 0, Damage Bonus: None
-Skills: Not set`
+Skills: Spot Hidden (29%)`
   );
 });
 

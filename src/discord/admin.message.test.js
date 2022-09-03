@@ -3,7 +3,7 @@ const DB = require("../db");
 const MockMessage = require("../mocks/mockMessage");
 
 const eventHandlers = {};
-const dummySettings = { ServerId: "1337", Data: {} };
+const dummySettings = { ServerId: "1337", Data: { Mark: "Auto" } };
 jest.mock("../discord/cocoaClient", () => {
   return {
     cocoaClient: {
