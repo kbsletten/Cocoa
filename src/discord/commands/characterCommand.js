@@ -6,7 +6,7 @@ class CharacterCommand extends Command {
   async processCommand() {
     this.character = await this.DB.getCharacter(
       this.msg.guild.id,
-      this.msg.author.id
+      this.msg.member.id
     );
     this.originalCharacter = JSON.parse(JSON.stringify(this.character));
     if (!this.character) {

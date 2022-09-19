@@ -5,7 +5,7 @@ class CheckCommand extends Command {
   async processCommand() {
     const character = await this.DB.getCharacter(
       this.msg.guild.id,
-      this.msg.author.id
+      this.msg.member.id
     );
     const name = character?.Name ?? (await this.getAuthorDisplayName());
     const skill = this.expr.skill ?? "an Unknown Skill";
@@ -21,8 +21,8 @@ ${message}; **${result}!**`
   }
 
   async getAuthorDisplayName() {
-    const member = await this.msg.guild.members.fetch(this.msg.author);
-    return member ? member.nickname : this.msg.author.username;
+    const member = await this.msg.guild.members.fetch(this.msg.member);
+    return member ? member.nickname : this.msg.member.username;
   }
 }
 

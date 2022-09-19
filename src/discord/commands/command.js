@@ -25,6 +25,10 @@ class Command {
     throw new Error("Not implemented.");
   }
 
+  getOptions() {
+    return [];
+  }
+
   async notifyAdmin(...msg) {
     if (this.serverSettings.Data.AdminChannel) {
       const channel = this.msg.client.channels.cache.get(

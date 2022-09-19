@@ -4,7 +4,7 @@ class ListCharactersCommand extends Command {
   async processCommand() {
     const characters = await this.DB.listCharacters(
       this.msg.guild.id,
-      this.msg.author.id
+      this.msg.member.id
     );
     if (!characters.length)
       return `Whoops! You don't have any characters yet. Try "new character".`;

@@ -29,7 +29,7 @@ class NewCharacterCommand extends Command {
     }
     await this.DB.createCharacter(
       this.msg.guild.id,
-      this.msg.author.id,
+      this.msg.member.id,
       character.Name,
       JSON.stringify(character.Data)
     );

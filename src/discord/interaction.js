@@ -5,8 +5,36 @@ const { cocoaClient } = require("./cocoaClient");
 const DB = require("../db");
 const { getEditMessage } = require("./getEditMessage");
 const { choiceCallback } = require("./choice");
+const commands = require('./commands');
+const parser = require('../parser/command.gen');
 
 cocoaClient.on("interactionCreate", async (interaction) => {
+  if (interaction.isCommand()) {
+    const Command = commands[interaction.commandName];
+    if (Command) {
+      await new Command(interaction, {}, DB).process();
+      return;
+    } else if (interaction.commandName === "cocoa") {
+      let expr;
+      try {
+        expr = parser.parse(interaction.options.getString("command"));
+      } catch (e) {
+        await interaction.reply(
+          `I'm sorry, I didn't understand what you meant.`
+        );
+        return;
+      }
+      const Command = commands[expr.command];
+      if (Command) {
+        await new Command(interaction, expr, DB).process();
+      } else {
+        await interaction.reply(
+          `I'm sorry, I don't understand "${expr.command}". Kyle will probably teach me soon.`
+        );
+      }
+    }
+    return;
+  }
   const serverSettings = await DB.getServerSettings(interaction.guild.id);
   const game = GAMES[serverSettings.Data["Game"] ?? "CORE"];
   try {
