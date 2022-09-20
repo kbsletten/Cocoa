@@ -1,6 +1,7 @@
 const CharacterCommand = require("./characterCommand");
 const { check } = require("../../coc/game");
 const StringOption = require("./options/stringOption");
+const { CHARACTERISTICS, PSEUDO_SKILLS } = require("../../coc/data");
 
 class SkillRollCommand extends CharacterCommand {
   async processCharacterCommand() {
@@ -18,6 +19,8 @@ class SkillRollCommand extends CharacterCommand {
     let mark = "";
     if (
       success > 0 &&
+      !CHARACTERISTICS.includes(skill) &&
+      !PSEUDO_SKILLS.includes(skill) &&
       (this.serverSettings.Data.Mark === "Always" ||
         (this.serverSettings.Data.Mark === "Auto" && bonus === 0))
     ) {
@@ -35,9 +38,7 @@ ${message}; **${result}!**${mark}`;
   }
 
   getOptions() {
-    return [
-      new StringOption("skill", "The name of the skill to roll.")
-    ]
+    return [new StringOption("skill", "The name of the skill to roll.")];
   }
 }
 

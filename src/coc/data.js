@@ -9,6 +9,13 @@ const CHARACTERISTICS = [
   "EDU",
 ];
 
+const PSEUDO_SKILLS = [
+  "Idea",
+  "Know",
+  "Sanity",
+  "Luck"
+]
+
 const CORE = {
   skills: {
     Accounting: 5,
@@ -212,6 +219,7 @@ module.exports = {
     MODERN,
     KIDS,
   },
+  PSEUDO_SKILLS,
   STATS,
   getDefaults,
 };
