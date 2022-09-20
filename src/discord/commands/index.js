@@ -15,12 +15,14 @@ const StatsCommand = require("./stats");
 const SetSkillCommand = require("./setSkill");
 const ResetSkillCommand = require("./resetSkill");
 const SheetCommand = require("./sheet");
+const InitiativeCommand = require("./initiative");
 
 module.exports = {
   check: CheckCommand,
   "delete character": DeleteCharacterCommand,
   "edit character": EditCharacterCommand,
   improve: ImproveCommand,
+  initiative: InitiativeCommand,
   "list characters": ListCharactersCommand,
   "list server characters": ListServerCharactersCommand,
   mark: MarkCommand,

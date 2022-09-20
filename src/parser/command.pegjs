@@ -13,6 +13,7 @@ Command
     /   HP WS n:NUMBER { return { 'command': 'stat', 'stat': 'HP', 'set': n }; }
     /   IMPROVE WS MARKED { return { 'command': 'improve' }; }
     /   IMPROVE WS s:WORDS { return { 'command': 'improve', 'skill': s }; }
+    /   INITIATIVE { return { 'command': 'initiative' }; }
     /   LIST WS CHARACTERS { return { 'command': 'list characters' }; }
     /   LIST WS SERVER WS CHARACTERS { return { 'command': 'list server characters' }; }
     /   LUCK WS n:MOD { return { 'command': 'stat', 'stat': 'Luck', 'add': n }; }
@@ -138,6 +139,10 @@ HP
     ;
 IMPROVE
     =   'improve'i
+    ;
+INITIATIVE
+    =   'initiative'i
+    /   'init'i
     ;
 LIST
     =   'list'i

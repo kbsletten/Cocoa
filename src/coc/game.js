@@ -255,6 +255,10 @@ function damageBonus(character) {
   }
 }
 
+function mod(number) {
+  return number ? ` ${number > 0 ? "+" : "-"} ${Math.abs(number)}` : "";
+}
+
 module.exports = {
   check,
   d10,
@@ -266,6 +270,7 @@ module.exports = {
   improve,
   listSkills,
   listStats,
+  mod,
   modify,
   move,
   build,
