@@ -1,5 +1,6 @@
 const CharacterCommand = require("./characterCommand");
 const { check } = require("../../coc/game");
+const StringOption = require("./options/stringOption");
 
 class SkillRollCommand extends CharacterCommand {
   async processCharacterCommand() {
@@ -31,6 +32,12 @@ Marked for improvement!`;
     }
     return `${this.character.Name} attempts ${skill} (${value}%${modifiers})!
 ${message}; **${result}!**${mark}`;
+  }
+
+  getOptions() {
+    return [
+      new StringOption("skill", "The name of the skill to roll.")
+    ]
   }
 }
 

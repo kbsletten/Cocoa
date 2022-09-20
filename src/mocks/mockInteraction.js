@@ -13,6 +13,10 @@ class MockInteraction {
     this.member = new MockMember(userId);
   }
 
+  isCommand() {
+    return false;
+  }
+
   isSelectMenu() {
     return Boolean(this.values);
   }
