@@ -16,6 +16,7 @@ Command
     /   INITIATIVE { return { 'command': 'initiative' }; }
     /   LIST WS CHARACTERS { return { 'command': 'list characters' }; }
     /   LIST WS SERVER WS CHARACTERS { return { 'command': 'list server characters' }; }
+    /   LIST WS (SERVER WS)? NPCS { return { 'command': 'list npcs' }; }
     /   LUCK WS n:MOD { return { 'command': 'stat', 'stat': 'Luck', 'add': n }; }
     /   LUCK WS n:NUMBER { return { 'command': 'stat', 'stat': 'Luck', 'set': n }; }
     /   MARK WS s:WORDS { return { 'command': 'mark', 'skill': s }; }
@@ -39,6 +40,7 @@ Command
     /   SET WS LUCK WS n:NUMBER { return { 'command': 'stat', 'stat': 'Luck', 'set': n }; }
     /   SET WS SANITY WS n:NUMBER { return { 'command': 'stat', 'stat': 'Sanity', 'set': n }; }
     /   SET WS SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n }; }
+    /   SET WS NPC WS b:BOOLEAN { return { 'command': 'set npc', 'value': b }; }
     /   SHEET { return { 'command': 'sheet' }; }
     /   SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n }; }
     /   SKILL WS s:Skill { return { 'command': 'skill roll', ...s }; }
@@ -101,6 +103,16 @@ Help
     /   STATS { return 'stats'; }
     ;
 
+BOOLEAN
+    =   (   'on'i
+        /   'true'i
+        /   'yes'i
+        ) { return true; }
+    /   (   'off'i
+        /   'false'i
+        /   'no'i
+        ) { return false; }
+    ;
 BONUS
     =   'bonus'i
     ;
@@ -174,6 +186,12 @@ NEW
     ;
 NUMBER
     =   ('0' / [1-9][0-9]*) { return parseInt(text(), 10); }
+    ;
+NPC
+    =   'npc'i
+    ;
+NPCS
+    =   'npcs'i
     ;
 PENALTY 
     =   'penalty'i

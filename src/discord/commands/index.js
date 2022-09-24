@@ -16,6 +16,8 @@ const SetSkillCommand = require("./setSkill");
 const ResetSkillCommand = require("./resetSkill");
 const SheetCommand = require("./sheet");
 const InitiativeCommand = require("./initiative");
+const NpcCommand = require("./npc");
+const ListNpcsCommand = require("./listNpcs");
 
 module.exports = {
   check: CheckCommand,
@@ -25,12 +27,14 @@ module.exports = {
   initiative: InitiativeCommand,
   "list characters": ListCharactersCommand,
   "list server characters": ListServerCharactersCommand,
+  "list npcs": ListNpcsCommand,
   mark: MarkCommand,
   "new character": NewCharacterCommand,
   "rename character": RenameCharacterCommand,
   "reset mark": ResetMarkCommand,
   "reset skill": ResetSkillCommand,
   roll: RollCommand,
+  "set npc": NpcCommand,
   "set skill": SetSkillCommand,
   sheet: SheetCommand,
   "skill roll": SkillRollCommand,

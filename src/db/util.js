@@ -2,6 +2,12 @@ const sqlite3 = require("sqlite3");
 const { loadFile } = require("../file");
 const conn = new sqlite3.Database("./cocoa.sqlite3");
 
+const VERSIONS = [
+  "ServerCharacters-UserId",
+  "ServerCharacters-IsPrimary",
+  "Characters-IsNpc",
+];
+
 function allPromise(sql, ...params) {
   return new Promise((resolve, reject) => {
     conn.all(sql, params, (error, rows) => {
@@ -54,15 +60,18 @@ let isLoaded = false;
 const loading = (async function loadingFunction() {
   const init = await loadFile("db/init.sql");
   await runAllSql(init);
-  const versions = (await allPromise(`SELECT VersionId FROM AppVersions`)).map(it => it.VersionId);
+  const versions = (await allPromise(`SELECT VersionId FROM AppVersions`)).map(
+    (it) => it.VersionId
+  );
   console.log(`Current versions: ${versions.join(", ")}`);
-  if (!versions.includes("ServerCharacters-UserId")) {
-    const serverCharacterUserId = await loadFile("db/ServerCharacters-UserId.sql");
+  for (const newVersion of VERSIONS) {
+    if (versions.includes(newVersion)) continue;
+    const serverCharacterUserId = await loadFile(`db/${newVersion}.sql`);
     await runAllSql(serverCharacterUserId);
-  }
-  if (!versions.includes("ServerCharacters-IsPrimary")) {
-    const serverCharacterIsPrimary = await loadFile("db/ServerCharacters-IsPrimary.sql");
-    await runAllSql(serverCharacterIsPrimary);
+    await runPromise(
+      `INSERT INTO AppVersions (VersionId) VALUES (?);`,
+      newVersion
+    );
   }
   isLoaded = true;
 })();

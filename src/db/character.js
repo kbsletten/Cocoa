@@ -1,25 +1,6 @@
 const DB = require("./util");
 const { v4: uuid } = require("uuid");
-
-function mapCharacter(character) {
-  if (!character) {
-    return null;
-  }
-  const data = JSON.parse(character.Data);
-  return {
-    ...character,
-    Data: {
-      ...data,
-      Characteristics: data.Characteristics ?? {},
-      Improvements: data.Improvements ?? [],
-      Skills: data.Skills ?? {},
-      Stats: data.Stats ?? {},
-      Meta: data.Meta ?? {
-        Karma: data.Meta?.Karma ?? 0,
-      },
-    },
-  };
-}
+const { mapCharacter } = require("./mapCharacter");
 
 async function createCharacter(serverId, userId, name, data) {
   const id = uuid();
@@ -61,7 +42,7 @@ async function getCharacterById(characterId) {
 
 async function getCharacter(serverId, userId) {
   const result = await DB.get(
-    `SELECT Characters.* FROM Characters JOIN ServerCharacters ON Characters.CharacterId = ServerCharacters.CharacterId WHERE ServerId = ? AND UserId = ? ORDER BY IsPrimary DESC`,
+    `SELECT Characters.* FROM Characters JOIN ServerCharacters ON Characters.CharacterId = ServerCharacters.CharacterId WHERE ServerId = ? AND UserId = ? AND NOT IsNpc ORDER BY IsPrimary DESC`,
     serverId,
     userId
   );
@@ -86,13 +67,30 @@ async function updateCharacterName(characterId, name) {
   return result;
 }
 
+async function updateCharacterIsNpc(characterId, isNpc) {
+  const result = await DB.run(
+    `UPDATE Characters SET IsNpc = ? WHERE CharacterId = ?`,
+    isNpc,
+    characterId
+  );
+  return result;
+}
+
 async function listCharacters(serverId, userId) {
   const results = await DB.all(
     userId
-      ? `SELECT Characters.* FROM Characters JOIN ServerCharacters ON Characters.CharacterId = ServerCharacters.CharacterId WHERE ServerId = ? AND UserId = ?`
-      : `SELECT Characters.* FROM Characters JOIN ServerCharacters ON Characters.CharacterId = ServerCharacters.CharacterId WHERE ServerId = ?`,
+      ? `SELECT Characters.* FROM Characters JOIN ServerCharacters ON Characters.CharacterId = ServerCharacters.CharacterId WHERE ServerId = ? AND UserId = ? AND NOT IsNpc`
+      : `SELECT Characters.* FROM Characters JOIN ServerCharacters ON Characters.CharacterId = ServerCharacters.CharacterId WHERE ServerId = ? AND NOT IsNpc`,
     serverId,
     userId
+  );
+  return results.map(mapCharacter);
+}
+
+async function listNpcs(serverId) {
+  const results = await DB.all(
+    `SELECT Characters.* FROM Characters JOIN ServerCharacters ON Characters.CharacterId = ServerCharacters.CharacterId WHERE ServerId = ? AND IsNpc`,
+    serverId
   );
   return results.map(mapCharacter);
 }
@@ -103,6 +101,8 @@ module.exports = {
   getCharacter,
   getCharacterById,
   listCharacters,
+  listNpcs,
   updateCharacterData,
+  updateCharacterIsNpc,
   updateCharacterName,
 };

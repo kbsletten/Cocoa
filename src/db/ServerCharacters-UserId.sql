@@ -9,5 +9,3 @@ SET UserId = (
 );
 
 ALTER TABLE Characters DROP COLUMN UserId;
-
-INSERT INTO AppVersions (VersionId) VALUES ("ServerCharacters-UserId");

@@ -1,8 +1,6 @@
-const Discord = require("discord.js");
 const DB = require("../db");
 const MockMessage = require("../mocks/mockMessage");
 const { v4: uuid } = require("uuid");
-const { choiceCallback } = require("./choice");
 
 const eventHandlers = {};
 jest.mock("../discord/cocoaClient", () => {
@@ -26,6 +24,7 @@ jest.mock("../db", () => {
     listCharacters: jest.fn(),
     updateCharacterData: jest.fn(),
     updateCharacterName: jest.fn(),
+    updateCharacterIsNpc: jest.fn()
   };
 });
 
