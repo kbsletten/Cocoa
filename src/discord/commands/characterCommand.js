@@ -74,10 +74,10 @@ class CharacterCommand extends Command {
       this.character.Data.Meta.Karma = 0;
     } else {
       this.character.Data.Meta.Karma =
-        (this.character.Data.Meta.Karma ?? 0) + (success < 0 ? 20 : 10);
+        (this.character.Data.Meta.Karma ?? 0) + (success < 0 ? 30 : 20);
     }
     await this.notifyAdmin(
-      `${this.character.Name}'s Karma updated: ${this.character.Data.Meta.Karma}`
+      `${this.character.Name}'s Karma updated: ${this.character.Data.Meta.Karma}%`
     );
     return false;
   }
