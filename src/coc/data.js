@@ -13,7 +13,8 @@ const PSEUDO_SKILLS = [
   "Idea",
   "Know",
   "Sanity",
-  "Luck"
+  "Luck",
+  "Cthulhu Mythos"
 ]
 
 const CORE = {
