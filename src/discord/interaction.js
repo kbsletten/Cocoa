@@ -5,14 +5,21 @@ const { cocoaClient } = require("./cocoaClient");
 const DB = require("../db");
 const { getEditMessage } = require("./getEditMessage");
 const { choiceCallback } = require("./choice");
-const commands = require('./commands');
-const parser = require('../parser/command.gen');
+const commands = require("./commands");
+const parser = require("../parser/command.gen");
 
 cocoaClient.on("interactionCreate", async (interaction) => {
   if (interaction.isCommand()) {
     const Command = commands[interaction.commandName];
     if (Command) {
-      await new Command(interaction, {}, DB).process();
+      const expr = {};
+      for (const option of Command.getOptions()) {
+        const value = interaction.options.get(option.name, option.required);
+        if (value) {
+          expr[value.name] = value.value;
+        }
+      }
+      await new Command(interaction, expr, DB).process();
       return;
     } else if (interaction.commandName === "cocoa") {
       let expr;

@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const { cocoaClient } = require("./cocoaClient");
+const { check } = require("./commands");
 
 const commands = [
   {
@@ -13,6 +14,11 @@ const commands = [
       },
     ],
   },
+  {
+    name: "check",
+    description: "Roll a skill check.",
+    options: check.getOptions(),
+  }
 ];
 
 cocoaClient.application.commands

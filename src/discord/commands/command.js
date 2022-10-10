@@ -25,7 +25,7 @@ class Command {
     throw new Error("Not implemented.");
   }
 
-  getOptions() {
+  static getOptions() {
     return [];
   }
 
