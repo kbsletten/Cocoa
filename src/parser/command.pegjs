@@ -225,7 +225,7 @@ STATS
     =   'stats'i
     ;
 WORD
-    =   [A-Za-z()]+ { return text(); }
+    =   [A-Za-z()/]+ { return text(); }
     ;
 WORDS
     =   WORD (WS WORD)* { return text(); }
