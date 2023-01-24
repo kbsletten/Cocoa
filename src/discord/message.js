@@ -6,7 +6,6 @@ const commands = require('./commands');
 
 cocoaClient.on("messageCreate", async (msg) => {
   if (msg.author.bot) {
-    console.log(`Hello, fellow bot!`);
     return;
   }
   let expr;

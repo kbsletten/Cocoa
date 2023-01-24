@@ -37,7 +37,6 @@ test("cocoa doesn't talk to strangers", async () => {
   const message = new MockMessage("Hi, Cocoa!", true);
   await eventHandlers["messageCreate"](message);
   expect(message.reply).not.toHaveBeenCalled();
-  expect(consoleLogFn).toHaveBeenCalledWith("Hello, fellow bot!");
 });
 
 test("cocoa ignores the haters", async () => {
