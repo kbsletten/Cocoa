@@ -475,6 +475,19 @@ test("'sanity 10' sets the sanity to 10", async () => {
   );
 });
 
+test("'sanity +d10+5' sets the sanity to 16", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+  jest.spyOn(global.Math, "random").mockImplementation(() => 0.0);
+
+  const message = new MockMessage("sanity +d10+5");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(DB.updateCharacterData).toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `Dummy Character's Sanity: 16/99 (+1d10 (1) + 5 = 6)`
+  );
+});
+
 test("'luck 10' sets the luck to 10", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
 
@@ -667,7 +680,7 @@ test("'stats' displays your stats", async () => {
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `**Dummy Character** HP: 0/10, Luck: 8/99, MP: 5/10, Sanity: 10/99`
+    `**Dummy Character** HP: 0/10, Luck: 8/99, MP: 5/10, Sanity: 16/99`
   );
 });
 
@@ -688,7 +701,7 @@ test("'sheet' displays your character sheet", async () => {
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
     `**Dummy Character**
-Stats: HP: 0/10, Luck: 8/99, MP: 5/10, Sanity: 10/99
+Stats: HP: 0/10, Luck: 8/99, MP: 5/10, Sanity: 16/99
 Move: 8, Build: 0, Damage Bonus: None
 Skills: Spot Hidden (29%)`
   );

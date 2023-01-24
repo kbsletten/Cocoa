@@ -10,7 +10,7 @@ Command
     /   HELP WS h:Help { return { 'command': 'help', 'help': h }; }
     /   HELP { return { 'command': 'help', 'help': 'help' }; }
     /   HP WS d:Dice { return { 'command': 'stat', 'stat': 'HP', 'dice': d }; }
-    /   HP WS m:MOD WS? n:NUMBER { return { 'command': 'stat', 'stat': 'HP', 'add': m * n }; }
+    /   HP WS s:SIGN WS? n:NUMBER { return { 'command': 'stat', 'stat': 'HP', 'add': s * n }; }
     /   HP WS n:NUMBER { return { 'command': 'stat', 'stat': 'HP', 'set': n }; }
     /   IMPROVE WS MARKED { return { 'command': 'improve' }; }
     /   IMPROVE WS s:WORDS { return { 'command': 'improve', 'skill': s }; }
@@ -19,11 +19,11 @@ Command
     /   LIST WS SERVER WS CHARACTERS { return { 'command': 'list server characters' }; }
     /   LIST WS (SERVER WS)? NPCS { return { 'command': 'list npcs' }; }
     /   LUCK WS d:Dice { return { 'command': 'stat', 'stat': 'Luck', 'dice': d }; }
-    /   LUCK WS m:MOD WS? n:NUMBER { return { 'command': 'stat', 'stat': 'Luck', 'add': m * n }; }
+    /   LUCK WS s:SIGN WS? n:NUMBER { return { 'command': 'stat', 'stat': 'Luck', 'add': s * n }; }
     /   LUCK WS n:NUMBER { return { 'command': 'stat', 'stat': 'Luck', 'set': n }; }
     /   MARK WS s:WORDS { return { 'command': 'mark', 'skill': s }; }
     /   MAGIC WS d:Dice { return { 'command': 'stat', 'stat': 'MP', 'dice': d }; }
-    /   MAGIC WS m:MOD WS? n:NUMBER { return { 'command': 'stat', 'stat': 'MP', 'add': m * n }; }
+    /   MAGIC WS m:SIGN WS? n:NUMBER { return { 'command': 'stat', 'stat': 'MP', 'add': m * n }; }
     /   MAGIC WS n:NUMBER { return { 'command': 'stat', 'stat': 'MP', 'set': n }; }
     /   NEW WS CHARACTER WS n:NAME { return { 'command': 'new character', 'name': n }; }
     /   NEW WS CHARACTER { return { 'command': 'new character' }; }
@@ -36,7 +36,7 @@ Command
     /   ROLL WS (CHECK WS)? n:NUMBER WS s:Skill { return { 'command': 'check', 'value': n, ...s }; }
     /   ROLL WS (CHECK WS)? n:NUMBER { return { 'command': 'check', 'value': n, 'bonus': 0, 'penalty': 0 }; }
     /   SANITY WS d:Dice { return { 'command': 'stat', 'stat': 'Sanity', 'dice': d }; }
-    /   SANITY WS m:MOD WS? n:NUMBER { return { 'command': 'stat', 'stat': 'Sanity', 'add': m * n }; }
+    /   SANITY WS s:SIGN WS? n:NUMBER { return { 'command': 'stat', 'stat': 'Sanity', 'add': s * n }; }
     /   SANITY WS n:NUMBER { return { 'command': 'stat', 'stat': 'Sanity', 'set': n }; }
     /   SET WS CUSTOM WS SKILL WS s:WORDS WS n:NUMBER { return { 'command': 'set skill', 'skill': s, 'value': n, 'custom': true }; }
     /   SET WS HP WS n:NUMBER { return { 'command': 'stat', 'stat': 'HP', 'set': n }; }
@@ -65,17 +65,26 @@ Modifiers
     ;
 
 Dice
+    =   s:SIGN WS? d:DoubleOp { return { ...d, sign: s }; }
+    /   d:DoubleOp { return d; }
+    /   s:SIGN WS? o:SingleOp { return { ...o, add: o.add ? s * o.add : o.add, sign: s }; }
+    /   o:SingleOp { return o }
+    /   s:SIGN WS? t:Term { return { ...t, sign: s }; }
+    /   t:Term { return t; }
+    ;
+
+DoubleOp
     =   '(' WS? t:Term WS? '+' WS? a:NUMBER WS? ')' WS? '*' WS? m:NUMBER  { return { ...t, add: a, multiply: m }; }
     /   '(' WS? t:Term WS? '-' WS? a:NUMBER WS? ')' WS? '*' WS? m:NUMBER  { return { ...t, add: -a, multiply: m }; }
     /   '(' WS? t:Term WS? '+' WS? a:NUMBER WS? ')' WS? '/' WS? m:NUMBER  { return { ...t, add: a, multiply: 1/m }; }
     /   '(' WS? t:Term WS? '-' WS? a:NUMBER WS? ')' WS? '/' WS? m:NUMBER  { return { ...t, add: -a, multiply: 1/m }; }
-    /   t:Term WS? '+' WS? a:NUMBER { return { ...t, add: a }; }
+    ;
+
+SingleOp
+    =   t:Term WS? '+' WS? a:NUMBER { return { ...t, add: a }; }
     /   t:Term WS? '-' WS? a:NUMBER { return { ...t, add: -a }; }
     /   t:Term WS? '*' WS? m:NUMBER { return { ...t, multiply: m }; }
     /   t:Term WS? '/' WS? m:NUMBER { return { ...t, multiply: 1/m }; }
-    /   '+' WS? t:Term { return { ...t, sign: 1 }; }
-    /   '-' WS? t:Term { return { ...t, sign: -1 }; }
-    /   t:Term { return t; }
     ;
 
 Term
@@ -178,7 +187,7 @@ MARK
 MARKED
     =   'marked'i
     ;
-MOD
+SIGN
     =   '+' { return 1; }
     /   '-' { return -1; }
     ;
