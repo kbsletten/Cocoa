@@ -65,19 +65,17 @@ Modifiers
     ;
 
 Dice
-    =   s:SIGN WS? d:DoubleOp { return { ...d, sign: s }; }
+    =   s:SIGN WS? d:DoubleOp { return { ...d, add: d.add ? s * d.add : d.add, sign: s }; }
     /   d:DoubleOp { return d; }
-    /   s:SIGN WS? o:SingleOp { return { ...o, add: o.add ? s * o.add : o.add, sign: s }; }
+    /   s:SIGN WS? o:SingleOp { return { ...o, sign: s }; }
     /   o:SingleOp { return o }
     /   s:SIGN WS? t:Term { return { ...t, sign: s }; }
     /   t:Term { return t; }
     ;
 
 DoubleOp
-    =   '(' WS? t:Term WS? '+' WS? a:NUMBER WS? ')' WS? '*' WS? m:NUMBER  { return { ...t, add: a, multiply: m }; }
-    /   '(' WS? t:Term WS? '-' WS? a:NUMBER WS? ')' WS? '*' WS? m:NUMBER  { return { ...t, add: -a, multiply: m }; }
-    /   '(' WS? t:Term WS? '+' WS? a:NUMBER WS? ')' WS? '/' WS? m:NUMBER  { return { ...t, add: a, multiply: 1/m }; }
-    /   '(' WS? t:Term WS? '-' WS? a:NUMBER WS? ')' WS? '/' WS? m:NUMBER  { return { ...t, add: -a, multiply: 1/m }; }
+    =   '(' WS? t:Term WS? s:SIGN WS? a:NUMBER WS? ')' WS? '*' WS? m:NUMBER  { return { ...t, add: s * a, multiply: m }; }
+    /   '(' WS? t:Term WS? s:SIGN WS? a:NUMBER WS? ')' WS? '/' WS? m:NUMBER  { return { ...t, add: s * a, multiply: 1/m }; }
     ;
 
 SingleOp

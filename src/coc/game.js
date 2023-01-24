@@ -12,11 +12,11 @@ function die(sides = 6, number = 1, sign = 1, add = 0, multiply = 1) {
   };
   if (add) {
     result.total += add;
-    result.display = `${result.display} + ${add}`;
+    result.display = `${result.display} ${add < 0 ? "-" : "+"} ${Math.abs(add)}`;
   }
   if (multiply !== 1) {
     result.total = Math.floor(result.total * multiply);
-    if (result.display.includes("+")) {
+    if (add) {
       result.display = `(${result.display})`;
     }
     result.display = `${result.display} * ${multiply}`;
@@ -168,7 +168,7 @@ function modify(
       dice.multiply
     );
     newValue = oldValue + total;
-    mod = `${total < 0 ? "" : "+"}${display} = ${total}`;
+    mod = `${dice.sign < 0 ? "" : "+"}${display} = ${total < 0 ? "" : "+"}${total}`;
   }
   if (isNaN(newValue)) {
     newValue = oldValue;

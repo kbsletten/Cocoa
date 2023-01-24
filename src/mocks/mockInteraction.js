@@ -11,6 +11,7 @@ class MockInteraction {
     this.update = jest.fn();
     this.guild = new MockGuild(undefined, isOwner ? userId : undefined);
     this.member = new MockMember(userId);
+    this.reply = jest.fn();
   }
 
   isCommand() {

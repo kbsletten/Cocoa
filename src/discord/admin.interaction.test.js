@@ -37,7 +37,7 @@ test("cocoa is nobody's fool", async () => {
     "KIDS",
   ]);
   await eventHandlers["interactionCreate"](interaction);
-  expect(consoleLogFn).toHaveBeenCalledWith(`I'm not listening.`);
+  expect(interaction.reply).not.toHaveBeenCalled();
 });
 
 test("'admin:serverSettings:Game' changes the game", async () => {

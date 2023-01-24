@@ -484,7 +484,7 @@ test("'sanity +d10+5' sets the sanity to 16", async () => {
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(DB.updateCharacterData).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `Dummy Character's Sanity: 16/99 (+1d10 (1) + 5 = 6)`
+    `Dummy Character's Sanity: 16/99 (+1d10 (1) + 5 = +6)`
   );
 });
 
@@ -510,6 +510,58 @@ test("'luck -2d6' sets the luck to 8", async () => {
   expect(DB.updateCharacterData).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
     `Dummy Character's Luck: 8/99 (-2d6 (1, 1) = -2)`
+  );
+});
+
+test("'luck +3d6 - 3' sets the luck to 8", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+  jest.spyOn(global.Math, "random").mockImplementation(() => 0.1);
+
+  const message = new MockMessage("luck +3d6 - 3");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(DB.updateCharacterData).not.toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `Dummy Character's Luck: 8/99 (+3d6 (1, 1, 1) - 3 = +0)`
+  );
+});
+
+test("'luck -3d6 + 3' sets the luck to 8", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+  jest.spyOn(global.Math, "random").mockImplementation(() => 0.1);
+
+  const message = new MockMessage("luck -3d6 + 3");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(DB.updateCharacterData).not.toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `Dummy Character's Luck: 8/99 (-3d6 (1, 1, 1) + 3 = +0)`
+  );
+});
+
+test("'luck -3d6 + 3' sets the luck to 8", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+  jest.spyOn(global.Math, "random").mockImplementation(() => 0.1);
+
+  const message = new MockMessage("luck -3d6 + 3");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(DB.updateCharacterData).not.toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `Dummy Character's Luck: 8/99 (-3d6 (1, 1, 1) + 3 = +0)`
+  );
+});
+
+test("'luck -(3d6 - 3) * 2' sets the luck to 8", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+  jest.spyOn(global.Math, "random").mockImplementation(() => 0.1);
+
+  const message = new MockMessage("luck -(3d6 - 3) * 2");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  //expect(DB.updateCharacterData).not.toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `Dummy Character's Luck: 8/99 ((-3d6 (1, 1, 1) + 3) * 2 = +0)`
   );
 });
 

@@ -5,11 +5,7 @@ const { isAdmin } = require("./admin");
 const { getServerSettingsMessage } = require("./getServerSettingsMessage");
 
 cocoaClient.on("messageCreate", async (msg) => {
-  if (msg.author.bot) {
-    return;
-  }
-  if (!isAdmin(msg)) {
-    console.log(`I'm not listening.`);
+  if (msg.author.bot || !isAdmin(msg)) {
     return;
   }
   let expr;

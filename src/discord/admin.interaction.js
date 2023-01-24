@@ -4,11 +4,7 @@ const { isAdmin } = require("./admin");
 const { getServerSettingsMessage } = require("./getServerSettingsMessage");
 
 cocoaClient.on("interactionCreate", async (interaction) => {
-  if (interaction.isCommand()) {
-    return;
-  }
-  if (!isAdmin(interaction)) {
-    console.log(`I'm not listening.`)
+  if (interaction.isCommand() || !isAdmin(interaction)) {
     return;
   }
   const serverSettings = await DB.getServerSettings(interaction.guild.id);

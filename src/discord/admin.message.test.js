@@ -50,7 +50,7 @@ test("cocoa is nobody's fool", async () => {
 
   const message = new MockMessage("admin server settings");
   await eventHandlers["messageCreate"](message);
-  expect(consoleLogFn).toHaveBeenCalledWith(`I'm not listening.`);
+  expect(message.reply).not.toHaveBeenCalled();
 });
 
 test("'admin sever settings' displays a menu", async () => {
