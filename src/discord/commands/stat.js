@@ -12,7 +12,8 @@ class StatCommand extends CharacterCommand {
       oldValue,
       maxValue,
       this.expr.add,
-      this.expr.set
+      this.expr.set,
+      this.expr.dice
     );
     this.character.Data.Stats[this.expr.stat] = newValue;
     return `${this.character.Name}'s ${this.expr.stat}: ${display}`;

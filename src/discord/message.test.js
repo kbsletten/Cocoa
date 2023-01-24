@@ -447,9 +447,22 @@ test("'hp 11' sets the HP to 10", async () => {
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(DB.updateCharacterData).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `Dummy Character's HP: 10/10 (+3)`
+    `Dummy Character's HP: 10/10 (+4 => +3)`
   );
 });
+
+test("'hp -3d6' sets the HP to 0", async () => {
+  DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
+  jest.spyOn(global.Math, "random").mockImplementation(() => 0.9);
+
+  const message = new MockMessage("hp -3d6");
+  await eventHandlers["messageCreate"](message);
+  expect(DB.getCharacter).toHaveBeenCalled();
+  expect(DB.updateCharacterData).toHaveBeenCalled();
+  expect(message.reply).toHaveBeenCalledWith(
+    `Dummy Character's HP: 0/10 (-3d6 (6, 6, 6) = -18 => -10)`
+  );
+})
 
 test("'sanity 10' sets the sanity to 10", async () => {
   DB.getCharacter.mockImplementationOnce(async () => dummyCharacter);
@@ -642,7 +655,7 @@ test("'stats' displays your stats", async () => {
   await eventHandlers["messageCreate"](message);
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
-    `**Dummy Character** HP: 10/10, Luck: 10/99, MP: 5/10, Sanity: 10/99`
+    `**Dummy Character** HP: 0/10, Luck: 10/99, MP: 5/10, Sanity: 10/99`
   );
 });
 
@@ -663,7 +676,7 @@ test("'sheet' displays your character sheet", async () => {
   expect(DB.getCharacter).toHaveBeenCalled();
   expect(message.reply).toHaveBeenCalledWith(
     `**Dummy Character**
-Stats: HP: 10/10, Luck: 10/99, MP: 5/10, Sanity: 10/99
+Stats: HP: 0/10, Luck: 10/99, MP: 5/10, Sanity: 10/99
 Move: 8, Build: 0, Damage Bonus: None
 Skills: Spot Hidden (29%)`
   );

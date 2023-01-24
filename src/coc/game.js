@@ -1,12 +1,14 @@
 const { CHARACTERISTICS, STATS, getDefaults } = require("./data");
 
-function die(sides = 6, number = 1, add = 0, multiply = 1) {
+function die(sides = 6, number = 1, sign = 1, add = 0, multiply = 1) {
   const rolls = [...Array(number).keys()].map(
     () => Math.floor(Math.random() * sides) + 1
   );
   const result = {
-    total: rolls.reduce((l, r) => l + r),
-    display: `${number}d${sides} (${rolls.join(", ")})`,
+    total: rolls.reduce((l, r) => l + r) * sign,
+    display: `${sign === -1 ? "-" : ""}${number}d${sides} (${rolls.join(
+      ", "
+    )})`,
   };
   if (add) {
     result.total += add;
@@ -22,12 +24,18 @@ function die(sides = 6, number = 1, add = 0, multiply = 1) {
   return result;
 }
 
-function d6(number = 1, { add, multiply } = { add: 0, multiply: 1 }) {
-  return die(6, number, add, multiply);
+function d6(
+  number = 1,
+  { add, multiply, sign } = { add: 0, multiply: 1, sign: 1 }
+) {
+  return die(6, number, sign, add, multiply);
 }
 
-function d10(number = 1, { add, multiply } = { add: 0, multiply: 1 }) {
-  return die(10, number, add, multiply);
+function d10(
+  number = 1,
+  { add, multiply, sign } = { add: 0, multiply: 1, sign: 1 }
+) {
+  return die(10, number, sign, add, multiply);
 }
 
 function formatOptions(options) {
@@ -136,24 +144,42 @@ function check(value, bonus = 0) {
   };
 }
 
-function modify(current, max, add = undefined, set = undefined) {
-  let next = current;
+function modify(
+  oldValue,
+  max,
+  add = undefined,
+  set = undefined,
+  dice = undefined
+) {
+  let newValue = oldValue;
+  let mod = "";
   if (!isNaN(set)) {
-    next = set;
+    newValue = set;
+    mod = `${newValue < oldValue ? "" : "+"}${newValue - oldValue}`;
   } else if (!isNaN(add)) {
-    next = current + add;
+    newValue = oldValue + add;
+    mod = `${add < 0 ? "" : "+"}${add}`;
+  } else if (dice) {
+    const { total, display } = die(
+      dice.sides,
+      dice.number,
+      dice.sign,
+      dice.add,
+      dice.multiply
+    );
+    newValue = oldValue + total;
+    mod = `${total < 0 ? "" : "+"}${display} = ${total}`;
   }
-  next = Math.max(0, Math.min(max, next));
-  if (isNaN(next)) {
-    next = current;
+  if (isNaN(newValue)) {
+    newValue = oldValue;
+  }
+  const cap = Math.max(0, Math.min(max, newValue));
+  if (cap !== newValue) {
+    mod = !mod ? "" : `${mod} => ${cap < oldValue ? "" : "+"}${cap - oldValue}`;
   }
   return {
-    value: next,
-    display: `${next}/${max}${
-      !isNaN(add ?? set)
-        ? ` (${next < current ? "" : "+"}${next - current})`
-        : ""
-    }`,
+    value: cap,
+    display: `${cap}/${max}${mod ? ` (${mod})` : ""}`,
   };
 }
 
