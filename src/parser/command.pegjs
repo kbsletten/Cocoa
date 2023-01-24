@@ -18,7 +18,7 @@ Command
     /   LIST WS CHARACTERS { return { 'command': 'list characters' }; }
     /   LIST WS SERVER WS CHARACTERS { return { 'command': 'list server characters' }; }
     /   LIST WS (SERVER WS)? NPCS { return { 'command': 'list npcs' }; }
-    /   LUCK WS d:Dice { return { 'command': 'stat', 'stat': 'luck', 'dice': d }; }
+    /   LUCK WS d:Dice { return { 'command': 'stat', 'stat': 'Luck', 'dice': d }; }
     /   LUCK WS m:MOD WS? n:NUMBER { return { 'command': 'stat', 'stat': 'Luck', 'add': m * n }; }
     /   LUCK WS n:NUMBER { return { 'command': 'stat', 'stat': 'Luck', 'set': n }; }
     /   MARK WS s:WORDS { return { 'command': 'mark', 'skill': s }; }
